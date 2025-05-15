@@ -1,0 +1,827 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {
+      "AngleSharp/1.2.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/AngleSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/AngleSharp.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "CliWrap/3.8.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/CliWrap.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/CliWrap.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Microsoft.Bcl.AsyncInterfaces/9.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "System.IO.Pipelines/9.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/System.IO.Pipelines.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/System.IO.Pipelines.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "System.Text.Encodings.Web/9.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/System.Text.Encodings.Web.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/System.Text.Encodings.Web.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.dll": {
+            "assetType": "runtime",
+            "rid": "browser"
+          }
+        }
+      },
+      "System.Text.Json/9.0.1": {
+        "type": "package",
+        "dependencies": {
+          "System.IO.Pipelines": "9.0.1",
+          "System.Text.Encodings.Web": "9.0.1"
+        },
+        "compile": {
+          "lib/net8.0/System.Text.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/System.Text.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/System.Text.Json.targets": {}
+        }
+      },
+      "System.Threading.Tasks.Extensions/4.6.0": {
+        "type": "package",
+        "compile": {
+          "lib/netcoreapp2.1/_._": {}
+        },
+        "runtime": {
+          "lib/netcoreapp2.1/_._": {}
+        }
+      },
+      "Xabe.FFmpeg/6.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Xabe.FFmpeg.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Xabe.FFmpeg.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "YoutubeExplode/6.5.4": {
+        "type": "package",
+        "dependencies": {
+          "AngleSharp": "1.2.0",
+          "Microsoft.Bcl.AsyncInterfaces": "9.0.1",
+          "System.Text.Json": "9.0.1",
+          "System.Threading.Tasks.Extensions": "4.6.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/YoutubeExplode.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/YoutubeExplode.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "YoutubeExplode.Converter/6.5.4": {
+        "type": "package",
+        "dependencies": {
+          "CliWrap": "3.8.1",
+          "YoutubeExplode": "6.5.4"
+        },
+        "compile": {
+          "lib/netstandard2.0/YoutubeExplode.Converter.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/YoutubeExplode.Converter.dll": {
+            "related": ".xml"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AngleSharp/1.2.0": {
+      "sha512": "uF/PzSCVcb+b2nqVvHZbOqexoJ9R6QLjonugPf0PQl+0h7YKaFZeXyspctbHe5HGlx7/Iuk5BErtk+t63ac/ZA==",
+      "type": "package",
+      "path": "anglesharp/1.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "anglesharp.1.2.0.nupkg.sha512",
+        "anglesharp.nuspec",
+        "lib/net462/AngleSharp.dll",
+        "lib/net462/AngleSharp.xml",
+        "lib/net472/AngleSharp.dll",
+        "lib/net472/AngleSharp.xml",
+        "lib/net6.0/AngleSharp.dll",
+        "lib/net6.0/AngleSharp.xml",
+        "lib/net7.0/AngleSharp.dll",
+        "lib/net7.0/AngleSharp.xml",
+        "lib/net8.0/AngleSharp.dll",
+        "lib/net8.0/AngleSharp.xml",
+        "lib/netstandard2.0/AngleSharp.dll",
+        "lib/netstandard2.0/AngleSharp.xml",
+        "logo.png"
+      ]
+    },
+    "CliWrap/3.8.1": {
+      "sha512": "iSjGhNhIB0gg2ihaMNZ5ZKx1B29/i5F9dvFxa2f8mLCiHluXKHUXUpvg0abEZ0vwMpo5u9PNVdWTVyhFLKZihQ==",
+      "type": "package",
+      "path": "cliwrap/3.8.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "cliwrap.3.8.1.nupkg.sha512",
+        "cliwrap.nuspec",
+        "favicon.png",
+        "lib/net8.0/CliWrap.dll",
+        "lib/net8.0/CliWrap.xml",
+        "lib/net9.0/CliWrap.dll",
+        "lib/net9.0/CliWrap.xml",
+        "lib/netstandard2.0/CliWrap.dll",
+        "lib/netstandard2.0/CliWrap.xml",
+        "lib/netstandard2.1/CliWrap.dll",
+        "lib/netstandard2.1/CliWrap.xml"
+      ]
+    },
+    "Microsoft.Bcl.AsyncInterfaces/9.0.1": {
+      "sha512": "IVkmUqf+KzbuXKrxi2tyQlg11RArYk26t2eU5cHekff+7Ao09vH8vt8idC0BJSMnpiRV2OK66zM2EwJU6Tm5Cw==",
+      "type": "package",
+      "path": "microsoft.bcl.asyncinterfaces/9.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/Microsoft.Bcl.AsyncInterfaces.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Bcl.AsyncInterfaces.targets",
+        "lib/net462/Microsoft.Bcl.AsyncInterfaces.dll",
+        "lib/net462/Microsoft.Bcl.AsyncInterfaces.xml",
+        "lib/netstandard2.0/Microsoft.Bcl.AsyncInterfaces.dll",
+        "lib/netstandard2.0/Microsoft.Bcl.AsyncInterfaces.xml",
+        "lib/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.dll",
+        "lib/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.xml",
+        "microsoft.bcl.asyncinterfaces.9.0.1.nupkg.sha512",
+        "microsoft.bcl.asyncinterfaces.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "System.IO.Pipelines/9.0.1": {
+      "sha512": "uXf5o8eV/gtzDQY4lGROLFMWQvcViKcF8o4Q6KpIOjloAQXrnscQSu6gTxYJMHuNJnh7szIF9AzkaEq+zDLoEg==",
+      "type": "package",
+      "path": "system.io.pipelines/9.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.IO.Pipelines.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/System.IO.Pipelines.targets",
+        "lib/net462/System.IO.Pipelines.dll",
+        "lib/net462/System.IO.Pipelines.xml",
+        "lib/net8.0/System.IO.Pipelines.dll",
+        "lib/net8.0/System.IO.Pipelines.xml",
+        "lib/net9.0/System.IO.Pipelines.dll",
+        "lib/net9.0/System.IO.Pipelines.xml",
+        "lib/netstandard2.0/System.IO.Pipelines.dll",
+        "lib/netstandard2.0/System.IO.Pipelines.xml",
+        "system.io.pipelines.9.0.1.nupkg.sha512",
+        "system.io.pipelines.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "System.Text.Encodings.Web/9.0.1": {
+      "sha512": "XkspqduP2t1e1x2vBUAD/xZ5ZDvmywuUwsmB93MvyQLospJfqtX0GsR/kU0vUL2h4kmvf777z3txV2W4NrQ9Qg==",
+      "type": "package",
+      "path": "system.text.encodings.web/9.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.Text.Encodings.Web.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/System.Text.Encodings.Web.targets",
+        "lib/net462/System.Text.Encodings.Web.dll",
+        "lib/net462/System.Text.Encodings.Web.xml",
+        "lib/net8.0/System.Text.Encodings.Web.dll",
+        "lib/net8.0/System.Text.Encodings.Web.xml",
+        "lib/net9.0/System.Text.Encodings.Web.dll",
+        "lib/net9.0/System.Text.Encodings.Web.xml",
+        "lib/netstandard2.0/System.Text.Encodings.Web.dll",
+        "lib/netstandard2.0/System.Text.Encodings.Web.xml",
+        "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.dll",
+        "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.xml",
+        "runtimes/browser/lib/net9.0/System.Text.Encodings.Web.dll",
+        "runtimes/browser/lib/net9.0/System.Text.Encodings.Web.xml",
+        "system.text.encodings.web.9.0.1.nupkg.sha512",
+        "system.text.encodings.web.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "System.Text.Json/9.0.1": {
+      "sha512": "eqWHDZqYPv1PvuvoIIx5pF74plL3iEOZOl/0kQP+Y0TEbtgNnM2W6k8h8EPYs+LTJZsXuWa92n5W5sHTWvE3VA==",
+      "type": "package",
+      "path": "system.text.json/9.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "analyzers/dotnet/roslyn3.11/cs/System.Text.Json.SourceGeneration.dll",
+        "analyzers/dotnet/roslyn3.11/cs/cs/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/de/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/es/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/fr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/it/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ja/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ko/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/pl/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/pt-BR/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ru/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/tr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/zh-Hans/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/zh-Hant/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/System.Text.Json.SourceGeneration.dll",
+        "analyzers/dotnet/roslyn4.0/cs/cs/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/de/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/es/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/fr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/it/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ja/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ko/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/pl/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/pt-BR/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ru/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/tr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/zh-Hans/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/zh-Hant/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/System.Text.Json.SourceGeneration.dll",
+        "analyzers/dotnet/roslyn4.4/cs/cs/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/de/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/es/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/fr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/it/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ja/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ko/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/pl/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/pt-BR/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ru/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/tr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/zh-Hans/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/zh-Hant/System.Text.Json.SourceGeneration.resources.dll",
+        "buildTransitive/net461/System.Text.Json.targets",
+        "buildTransitive/net462/System.Text.Json.targets",
+        "buildTransitive/net8.0/System.Text.Json.targets",
+        "buildTransitive/netcoreapp2.0/System.Text.Json.targets",
+        "buildTransitive/netstandard2.0/System.Text.Json.targets",
+        "lib/net462/System.Text.Json.dll",
+        "lib/net462/System.Text.Json.xml",
+        "lib/net8.0/System.Text.Json.dll",
+        "lib/net8.0/System.Text.Json.xml",
+        "lib/net9.0/System.Text.Json.dll",
+        "lib/net9.0/System.Text.Json.xml",
+        "lib/netstandard2.0/System.Text.Json.dll",
+        "lib/netstandard2.0/System.Text.Json.xml",
+        "system.text.json.9.0.1.nupkg.sha512",
+        "system.text.json.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "System.Threading.Tasks.Extensions/4.6.0": {
+      "sha512": "I5G6Y8jb0xRtGUC9Lahy7FUvlYlnGMMkbuKAQBy8Jb7Y6Yn8OlBEiUOY0PqZ0hy6Ua8poVA1ui1tAIiXNxGdsg==",
+      "type": "package",
+      "path": "system.threading.tasks.extensions/4.6.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "buildTransitive/net461/System.Threading.Tasks.Extensions.targets",
+        "buildTransitive/net462/_._",
+        "lib/net462/System.Threading.Tasks.Extensions.dll",
+        "lib/net462/System.Threading.Tasks.Extensions.xml",
+        "lib/netcoreapp2.1/_._",
+        "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll",
+        "lib/netstandard2.0/System.Threading.Tasks.Extensions.xml",
+        "system.threading.tasks.extensions.4.6.0.nupkg.sha512",
+        "system.threading.tasks.extensions.nuspec"
+      ]
+    },
+    "Xabe.FFmpeg/6.0.1": {
+      "sha512": "QvPEyASVFL9UkPHVn3GQlYYPJvVMvcBCVLM/rNGdGNvkRbG4g9x45XEQduYOv/hxYmY5XVcZUyg/hwuuRDO5Zw==",
+      "type": "package",
+      "path": "xabe.ffmpeg/6.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/Xabe.FFmpeg.dll",
+        "lib/netstandard2.0/Xabe.FFmpeg.xml",
+        "xabe.ffmpeg.6.0.1.nupkg.sha512",
+        "xabe.ffmpeg.nuspec"
+      ]
+    },
+    "YoutubeExplode/6.5.4": {
+      "sha512": "SWMvvvC/xEjkDEnQW28xeBXn0mgB7tsNtXvtcMpxYioyVuUWzsx94oWVQgUZIaT+Zbmvj03LaKIwK9mTGKMZQg==",
+      "type": "package",
+      "path": "youtubeexplode/6.5.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "favicon.png",
+        "lib/net9.0/YoutubeExplode.dll",
+        "lib/net9.0/YoutubeExplode.xml",
+        "lib/netstandard2.0/YoutubeExplode.dll",
+        "lib/netstandard2.0/YoutubeExplode.xml",
+        "youtubeexplode.6.5.4.nupkg.sha512",
+        "youtubeexplode.nuspec"
+      ]
+    },
+    "YoutubeExplode.Converter/6.5.4": {
+      "sha512": "Sa5S+7MGXnJk+svpUPOvoIK7QWQlUfY4liZRUUPv7oTAIyk7IY4SVHJDAG1dOAhQMh2734nBrs9y2ABlwrqJxg==",
+      "type": "package",
+      "path": "youtubeexplode.converter/6.5.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "favicon.png",
+        "lib/net9.0/YoutubeExplode.Converter.dll",
+        "lib/net9.0/YoutubeExplode.Converter.xml",
+        "lib/netstandard2.0/YoutubeExplode.Converter.dll",
+        "lib/netstandard2.0/YoutubeExplode.Converter.xml",
+        "youtubeexplode.converter.6.5.4.nupkg.sha512",
+        "youtubeexplode.converter.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "Xabe.FFmpeg >= 6.0.1",
+      "YoutubeExplode >= 6.5.4",
+      "YoutubeExplode.Converter >= 6.5.4"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\serkut.yildirim\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "c:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj",
+      "projectName": "YouTubeDubber.Core",
+      "projectPath": "c:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj",
+      "packagesPath": "C:\\Users\\serkut.yildirim\\.nuget\\packages\\",
+      "outputPath": "c:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\serkut.yildirim\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "10.0.100"
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "dependencies": {
+          "Xabe.FFmpeg": {
+            "target": "Package",
+            "version": "[6.0.1, )"
+          },
+          "YoutubeExplode": {
+            "target": "Package",
+            "version": "[6.5.4, )"
+          },
+          "YoutubeExplode.Converter": {
+            "target": "Package",
+            "version": "[6.5.4, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.12, 8.0.12]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.12, 8.0.12]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[8.0.12, 8.0.12]"
+          }
+        ],
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-preview.1.25120.13/PortableRuntimeIdentifierGraph.json",
+        "packagesToPrune": {
+          "Microsoft.CSharp": "(, 4.7.0]",
+          "Microsoft.NETCore.App": "(, 2.1.0]",
+          "Microsoft.VisualBasic": "(, 10.3.0]",
+          "Microsoft.Win32.Primitives": "(, 4.3.0]",
+          "Microsoft.Win32.Registry": "(, 5.0.0]",
+          "runtime.any.System.Collections": "(, 4.3.0]",
+          "runtime.any.System.Diagnostics.Tools": "(, 4.3.0]",
+          "runtime.any.System.Diagnostics.Tracing": "(, 4.3.0]",
+          "runtime.any.System.Globalization": "(, 4.3.0]",
+          "runtime.any.System.Globalization.Calendars": "(, 4.3.0]",
+          "runtime.any.System.IO": "(, 4.3.0]",
+          "runtime.any.System.Reflection": "(, 4.3.0]",
+          "runtime.any.System.Reflection.Extensions": "(, 4.3.0]",
+          "runtime.any.System.Reflection.Primitives": "(, 4.3.0]",
+          "runtime.any.System.Resources.ResourceManager": "(, 4.3.0]",
+          "runtime.any.System.Runtime": "(, 4.3.1]",
+          "runtime.any.System.Runtime.Handles": "(, 4.3.0]",
+          "runtime.any.System.Runtime.InteropServices": "(, 4.3.0]",
+          "runtime.any.System.Text.Encoding": "(, 4.3.0]",
+          "runtime.any.System.Text.Encoding.Extensions": "(, 4.3.0]",
+          "runtime.any.System.Threading.Tasks": "(, 4.3.0]",
+          "runtime.any.System.Threading.Timer": "(, 4.3.0]",
+          "runtime.aot.System.Collections": "(, 4.3.0]",
+          "runtime.aot.System.Diagnostics.Tools": "(, 4.3.0]",
+          "runtime.aot.System.Diagnostics.Tracing": "(, 4.3.0]",
+          "runtime.aot.System.Globalization": "(, 4.3.0]",
+          "runtime.aot.System.Globalization.Calendars": "(, 4.3.0]",
+          "runtime.aot.System.IO": "(, 4.3.0]",
+          "runtime.aot.System.Reflection": "(, 4.3.0]",
+          "runtime.aot.System.Reflection.Extensions": "(, 4.3.0]",
+          "runtime.aot.System.Reflection.Primitives": "(, 4.3.0]",
+          "runtime.aot.System.Resources.ResourceManager": "(, 4.3.0]",
+          "runtime.aot.System.Runtime": "(, 4.3.1]",
+          "runtime.aot.System.Runtime.Handles": "(, 4.3.0]",
+          "runtime.aot.System.Runtime.InteropServices": "(, 4.3.0]",
+          "runtime.aot.System.Text.Encoding": "(, 4.3.0]",
+          "runtime.aot.System.Text.Encoding.Extensions": "(, 4.3.0]",
+          "runtime.aot.System.Threading.Tasks": "(, 4.3.0]",
+          "runtime.aot.System.Threading.Timer": "(, 4.3.0]",
+          "runtime.debian.8-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.debian.8-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.debian.8-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.debian.8-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.debian.8-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.debian.9-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.debian.9-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.debian.9-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.debian.9-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.debian.9-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.debian.9-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.fedora.23-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.fedora.23-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.fedora.23-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.fedora.23-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.fedora.23-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.fedora.23-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.fedora.24-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.fedora.24-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.fedora.24-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.fedora.24-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.fedora.24-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.fedora.24-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.fedora.27-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.fedora.27-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.fedora.27-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.fedora.27-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.fedora.27-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.fedora.27-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.fedora.28-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.fedora.28-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.fedora.28-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.fedora.28-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.fedora.28-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.fedora.28-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.native.System.Security.Cryptography.Apple": "(, 4.3.1]",
+          "runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.opensuse.13.2-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.opensuse.13.2-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.opensuse.13.2-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.opensuse.13.2-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.opensuse.42.1-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.opensuse.42.1-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.opensuse.42.1-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.opensuse.42.1-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.opensuse.42.3-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.opensuse.42.3-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.opensuse.42.3-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.opensuse.42.3-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.opensuse.42.3-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.opensuse.42.3-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.osx.10.10-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.osx.10.10-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.osx.10.10-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.osx.10.10-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.Apple": "(, 4.3.1]",
+          "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.rhel.7-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.rhel.7-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.rhel.7-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.rhel.7-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.rhel.7-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.rhel.7-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.ubuntu.14.04-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.ubuntu.14.04-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.ubuntu.14.04-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.ubuntu.14.04-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.ubuntu.16.04-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.ubuntu.16.04-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.ubuntu.16.04-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.ubuntu.16.04-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.ubuntu.16.10-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.ubuntu.16.10-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.ubuntu.16.10-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.ubuntu.16.10-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.ubuntu.18.04-x64.runtime.native.System": "(, 4.3.1]",
+          "runtime.ubuntu.18.04-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.ubuntu.18.04-x64.runtime.native.System.Net.Http": "(, 4.3.1]",
+          "runtime.ubuntu.18.04-x64.runtime.native.System.Net.Security": "(, 4.3.1]",
+          "runtime.ubuntu.18.04-x64.runtime.native.System.Security.Cryptography": "(, 4.3.4]",
+          "runtime.ubuntu.18.04-x64.runtime.native.System.Security.Cryptography.OpenSsl": "(, 4.3.3]",
+          "runtime.unix.Microsoft.Win32.Primitives": "(, 4.3.0]",
+          "runtime.unix.System.Console": "(, 4.3.1]",
+          "runtime.unix.System.Diagnostics.Debug": "(, 4.3.0]",
+          "runtime.unix.System.IO.FileSystem": "(, 4.3.0]",
+          "runtime.unix.System.Net.Primitives": "(, 4.3.0]",
+          "runtime.unix.System.Net.Sockets": "(, 4.3.0]",
+          "runtime.unix.System.Private.Uri": "(, 4.3.1]",
+          "runtime.unix.System.Runtime.Extensions": "(, 4.3.1]",
+          "runtime.win.Microsoft.Win32.Primitives": "(, 4.3.0]",
+          "runtime.win.System.Console": "(, 4.3.1]",
+          "runtime.win.System.Diagnostics.Debug": "(, 4.3.0]",
+          "runtime.win.System.IO.FileSystem": "(, 4.3.0]",
+          "runtime.win.System.Net.Primitives": "(, 4.3.0]",
+          "runtime.win.System.Net.Sockets": "(, 4.3.0]",
+          "runtime.win.System.Runtime.Extensions": "(, 4.3.1]",
+          "runtime.win10-arm-aot.runtime.native.System.IO.Compression": "(, 4.0.1]",
+          "runtime.win10-arm64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.win10-x64-aot.runtime.native.System.IO.Compression": "(, 4.0.1]",
+          "runtime.win10-x86-aot.runtime.native.System.IO.Compression": "(, 4.0.1]",
+          "runtime.win7-x64.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.win7-x86.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "runtime.win7.System.Private.Uri": "(, 4.3.1]",
+          "runtime.win8-arm.runtime.native.System.IO.Compression": "(, 4.3.2]",
+          "System.AppContext": "(, 4.3.0]",
+          "System.Buffers": "(, 4.5.1]",
+          "System.Collections": "(, 4.3.0]",
+          "System.Collections.Concurrent": "(, 4.3.0]",
+          "System.Collections.Immutable": "(, 8.0.0]",
+          "System.Collections.NonGeneric": "(, 4.3.0]",
+          "System.Collections.Specialized": "(, 4.3.0]",
+          "System.ComponentModel": "(, 4.3.0]",
+          "System.ComponentModel.Annotations": "(, 5.0.0]",
+          "System.ComponentModel.EventBasedAsync": "(, 4.3.0]",
+          "System.ComponentModel.Primitives": "(, 4.3.0]",
+          "System.ComponentModel.TypeConverter": "(, 4.3.0]",
+          "System.Console": "(, 4.3.1]",
+          "System.Data.Common": "(, 4.3.0]",
+          "System.Data.DataSetExtensions": "(, 4.5.0]",
+          "System.Diagnostics.Contracts": "(, 4.3.0]",
+          "System.Diagnostics.Debug": "(, 4.3.0]",
+          "System.Diagnostics.DiagnosticSource": "(, 8.0.1]",
+          "System.Diagnostics.FileVersionInfo": "(, 4.3.0]",
+          "System.Diagnostics.Process": "(, 4.3.0]",
+          "System.Diagnostics.StackTrace": "(, 4.3.0]",
+          "System.Diagnostics.TextWriterTraceListener": "(, 4.3.0]",
+          "System.Diagnostics.Tools": "(, 4.3.0]",
+          "System.Diagnostics.TraceSource": "(, 4.3.0]",
+          "System.Diagnostics.Tracing": "(, 4.3.0]",
+          "System.Drawing.Primitives": "(, 4.3.0]",
+          "System.Dynamic.Runtime": "(, 4.3.0]",
+          "System.Formats.Asn1": "(, 8.0.1]",
+          "System.Globalization": "(, 4.3.0]",
+          "System.Globalization.Calendars": "(, 4.3.0]",
+          "System.Globalization.Extensions": "(, 4.3.0]",
+          "System.IO": "(, 4.3.0]",
+          "System.IO.Compression": "(, 4.3.0]",
+          "System.IO.Compression.ZipFile": "(, 4.3.0]",
+          "System.IO.FileSystem": "(, 4.3.0]",
+          "System.IO.FileSystem.AccessControl": "(, 5.0.0]",
+          "System.IO.FileSystem.DriveInfo": "(, 4.3.1]",
+          "System.IO.FileSystem.Primitives": "(, 4.3.0]",
+          "System.IO.FileSystem.Watcher": "(, 4.3.0]",
+          "System.IO.IsolatedStorage": "(, 4.3.0]",
+          "System.IO.MemoryMappedFiles": "(, 4.3.0]",
+          "System.IO.Pipes": "(, 4.3.0]",
+          "System.IO.Pipes.AccessControl": "(, 4.6.0]",
+          "System.IO.UnmanagedMemoryStream": "(, 4.3.0]",
+          "System.Linq": "(, 4.3.0]",
+          "System.Linq.Expressions": "(, 4.3.0]",
+          "System.Linq.Parallel": "(, 4.3.0]",
+          "System.Linq.Queryable": "(, 4.3.0]",
+          "System.Memory": "(, 4.5.5]",
+          "System.Net.Http": "(, 4.3.4]",
+          "System.Net.Http.Json": "(, 8.0.1]",
+          "System.Net.NameResolution": "(, 4.3.0]",
+          "System.Net.NetworkInformation": "(, 4.3.0]",
+          "System.Net.Ping": "(, 4.3.0]",
+          "System.Net.Primitives": "(, 4.3.1]",
+          "System.Net.Requests": "(, 4.3.0]",
+          "System.Net.Security": "(, 4.3.2]",
+          "System.Net.Sockets": "(, 4.3.0]",
+          "System.Net.WebHeaderCollection": "(, 4.3.0]",
+          "System.Net.WebSockets": "(, 4.3.0]",
+          "System.Net.WebSockets.Client": "(, 4.3.2]",
+          "System.Numerics.Vectors": "(, 4.5.0]",
+          "System.ObjectModel": "(, 4.3.0]",
+          "System.Private.DataContractSerialization": "(, 4.3.0]",
+          "System.Private.Uri": "(, 4.3.0]",
+          "System.Reflection": "(, 4.3.0]",
+          "System.Reflection.DispatchProxy": "(, 4.7.1]",
+          "System.Reflection.Emit": "(, 4.7.0]",
+          "System.Reflection.Emit.ILGeneration": "(, 4.7.0]",
+          "System.Reflection.Emit.Lightweight": "(, 4.7.0]",
+          "System.Reflection.Extensions": "(, 4.3.0]",
+          "System.Reflection.Metadata": "(, 8.0.1]",
+          "System.Reflection.Primitives": "(, 4.3.0]",
+          "System.Reflection.TypeExtensions": "(, 4.7.0]",
+          "System.Resources.Reader": "(, 4.3.0]",
+          "System.Resources.ResourceManager": "(, 4.3.0]",
+          "System.Resources.Writer": "(, 4.3.0]",
+          "System.Runtime": "(, 4.3.1]",
+          "System.Runtime.CompilerServices.Unsafe": "(, 6.0.0]",
+          "System.Runtime.CompilerServices.VisualC": "(, 4.3.0]",
+          "System.Runtime.Extensions": "(, 4.3.1]",
+          "System.Runtime.Handles": "(, 4.3.0]",
+          "System.Runtime.InteropServices": "(, 4.3.0]",
+          "System.Runtime.InteropServices.RuntimeInformation": "(, 4.3.0]",
+          "System.Runtime.InteropServices.WindowsRuntime": "(, 4.3.0]",
+          "System.Runtime.Loader": "(, 4.3.0]",
+          "System.Runtime.Numerics": "(, 4.3.0]",
+          "System.Runtime.Serialization.Formatters": "(, 4.3.0]",
+          "System.Runtime.Serialization.Json": "(, 4.3.0]",
+          "System.Runtime.Serialization.Primitives": "(, 4.3.0]",
+          "System.Runtime.Serialization.Xml": "(, 4.3.0]",
+          "System.Runtime.WindowsRuntime": "(, 4.7.0]",
+          "System.Runtime.WindowsRuntime.UI.Xaml": "(, 4.7.0]",
+          "System.Security.AccessControl": "(, 6.0.1]",
+          "System.Security.Claims": "(, 4.3.0]",
+          "System.Security.Cryptography.Algorithms": "(, 4.3.1]",
+          "System.Security.Cryptography.Cng": "(, 4.6.0]",
+          "System.Security.Cryptography.Csp": "(, 4.3.0]",
+          "System.Security.Cryptography.Encoding": "(, 4.3.0]",
+          "System.Security.Cryptography.OpenSsl": "(, 5.0.0]",
+          "System.Security.Cryptography.Primitives": "(, 4.3.0]",
+          "System.Security.Cryptography.X509Certificates": "(, 4.3.2]",
+          "System.Security.Cryptography.Xml": "(, 4.4.0]",
+          "System.Security.Principal": "(, 4.3.0]",
+          "System.Security.Principal.Windows": "(, 5.0.0]",
+          "System.Security.SecureString": "(, 4.3.0]",
+          "System.Text.Encoding": "(, 4.3.0]",
+          "System.Text.Encoding.CodePages": "(, 8.0.0]",
+          "System.Text.Encoding.Extensions": "(, 4.3.0]",
+          "System.Text.Encodings.Web": "(, 8.0.0]",
+          "System.Text.Json": "(, 8.0.5]",
+          "System.Text.RegularExpressions": "(, 4.3.1]",
+          "System.Threading": "(, 4.3.0]",
+          "System.Threading.Channels": "(, 8.0.0]",
+          "System.Threading.Overlapped": "(, 4.3.0]",
+          "System.Threading.Tasks": "(, 4.3.0]",
+          "System.Threading.Tasks.Dataflow": "(, 8.0.1]",
+          "System.Threading.Tasks.Extensions": "(, 4.5.4]",
+          "System.Threading.Tasks.Parallel": "(, 4.3.0]",
+          "System.Threading.Thread": "(, 4.3.0]",
+          "System.Threading.ThreadPool": "(, 4.3.0]",
+          "System.Threading.Timer": "(, 4.3.0]",
+          "System.ValueTuple": "(, 4.5.0]",
+          "System.Xml.ReaderWriter": "(, 4.3.1]",
+          "System.Xml.XDocument": "(, 4.3.0]",
+          "System.Xml.XmlDocument": "(, 4.3.0]",
+          "System.Xml.XmlSerializer": "(, 4.3.0]",
+          "System.Xml.XPath": "(, 4.3.0]",
+          "System.Xml.XPath.XDocument": "(, 4.3.0]"
+        }
+      }
+    }
+  }
+}

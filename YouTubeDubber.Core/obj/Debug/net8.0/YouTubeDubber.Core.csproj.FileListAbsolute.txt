@@ -1,0 +1,12 @@
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\YouTubeDubber.Core.csproj.AssemblyReference.cache
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\YouTubeDubber.Core.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\YouTubeDubber.Core.AssemblyInfoInputs.cache
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\YouTubeDubber.Core.AssemblyInfo.cs
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\YouTubeDubber.Core.csproj.CoreCompileInputs.cache
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\bin\Debug\net8.0\YouTubeDubber.Core.deps.json
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\bin\Debug\net8.0\YouTubeDubber.Core.dll
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\bin\Debug\net8.0\YouTubeDubber.Core.pdb
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\YouTubeDubber.Core.dll
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\refint\YouTubeDubber.Core.dll
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\YouTubeDubber.Core.pdb
+c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\ref\YouTubeDubber.Core.dll
