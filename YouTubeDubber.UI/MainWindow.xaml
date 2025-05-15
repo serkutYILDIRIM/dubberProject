@@ -18,23 +18,36 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
-    
-    <Grid Margin="16">
+      <Grid Margin="16">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
+        <!-- Menu Bar -->
+        <Menu Grid.Row="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="Exit" Click="BtnExit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Settings">
+                <MenuItem Header="Configure Speech Credentials" Click="BtnConfigureSpeechCredentials_Click"/>
+                <MenuItem Header="Configure Translation Credentials" Click="BtnConfigureTranslationCredentials_Click"/>
+                <MenuItem Header="Reset All Credentials" Click="BtnResetCredentials_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="About" Click="BtnAbout_Click"/>
+            </MenuItem>
+        </Menu>
         
         <!-- Header -->
-        <TextBlock Grid.Row="0" 
+        <TextBlock Grid.Row="1" 
                    Text="YouTube Video Dubber" 
                    Style="{StaticResource MaterialDesignHeadline4TextBlock}"
-                   Margin="0,0,0,16"/>
-
-        <!-- YouTube URL Input Section -->
-        <Grid Grid.Row="1">
+                   Margin="0,16,0,16"/>        <!-- YouTube URL Input Section -->
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -55,9 +68,8 @@
                     Click="BtnGetVideoInfo_Click"
                     Margin="0,0,0,0" />
         </Grid>
-        
-        <!-- Video Information and Download Section -->
-        <materialDesign:Card Grid.Row="2" Margin="0,16,0,16" Padding="16">
+          <!-- Video Information and Download Section -->
+        <materialDesign:Card Grid.Row="3" Margin="0,16,0,16" Padding="16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -120,12 +132,153 @@
                                         Style="{StaticResource MaterialDesignOutlinedButton}"
                                         Click="BtnDownloadAudio_Click"/>
                             </StackPanel>
-                            
-                            <Button x:Name="btnExtractSpeechAudio" 
+                              <Button x:Name="btnExtractSpeechAudio" 
                                     Content="Extract Speech-Optimized Audio" 
                                     Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
                                     Click="BtnExtractSpeechAudio_Click"/>
+                                    
+                            <Button x:Name="btnTranscribeAudio" 
+                                    Content="Transcribe Audio to Text" 
+                                    Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                                    Margin="0,8,0,0"
+                                    Click="BtnTranscribeAudio_Click"/>
                         </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </materialDesign:Card>
+          <!-- Transcription and Translation Result Section -->
+        <materialDesign:Card Grid.Row="2" Margin="0,16,0,16" Padding="16" 
+                             x:Name="transcriptionPanel" Visibility="Collapsed">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Tab Control for Transcription/Translation -->
+                <TabControl Grid.Row="0" Grid.RowSpan="2"
+                            Style="{StaticResource MaterialDesignTabControl}"
+                            x:Name="tabTextResults">
+                    <!-- Original Transcription Tab -->
+                    <TabItem Header="English Transcription">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Transcription Text -->
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" MaxHeight="250">
+                                <TextBox x:Name="txtTranscriptionResult" 
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         TextWrapping="Wrap" 
+                                         AcceptsReturn="True"
+                                         VerticalAlignment="Stretch"
+                                         IsReadOnly="True"/>
+                            </ScrollViewer>
+                        </Grid>
+                    </TabItem>
+                    
+                    <!-- Translation Tab -->
+                    <TabItem Header="Turkish Translation" x:Name="tabTranslation">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Translation Text -->
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" MaxHeight="250">
+                                <TextBox x:Name="txtTranslationResult" 
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         TextWrapping="Wrap" 
+                                         AcceptsReturn="True"
+                                         VerticalAlignment="Stretch"
+                                         IsReadOnly="True"/>
+                            </ScrollViewer>
+                        </Grid>
+                    </TabItem>
+                    
+                    <!-- Bilingual View Tab -->
+                    <TabItem Header="Side by Side">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Source Text -->
+                            <DockPanel Grid.Column="0" Margin="0,0,4,0">
+                                <TextBlock DockPanel.Dock="Top" Text="English (Source)" FontWeight="Bold" Margin="0,0,0,4"/>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <TextBox x:Name="txtBilingualSource" 
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                             TextWrapping="Wrap" 
+                                             AcceptsReturn="True"
+                                             VerticalAlignment="Stretch"
+                                             IsReadOnly="True"/>
+                                </ScrollViewer>
+                            </DockPanel>
+                            
+                            <!-- Target Text -->
+                            <DockPanel Grid.Column="1" Margin="4,0,0,0">
+                                <TextBlock DockPanel.Dock="Top" Text="Turkish (Translation)" FontWeight="Bold" Margin="0,0,0,4"/>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <TextBox x:Name="txtBilingualTarget" 
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                             TextWrapping="Wrap" 
+                                             AcceptsReturn="True"
+                                             VerticalAlignment="Stretch"
+                                             IsReadOnly="True"/>
+                                </ScrollViewer>
+                            </DockPanel>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+                
+                <!-- Action Buttons -->
+                <Grid Grid.Row="2" Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Transcription Actions -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Button x:Name="btnSaveTranscription" 
+                                Content="Save Transcription" 
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Click="BtnSaveTranscription_Click"
+                                Margin="0,0,8,0"/>
+                    </StackPanel>
+                      <!-- Translation Actions -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button x:Name="btnSaveTranslation" 
+                                Content="Save Translation" 
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Click="BtnSaveTranslation_Click"
+                                Margin="0,0,8,0"
+                                Visibility="Collapsed"/>
+                        
+                        <Button x:Name="btnGenerateSpeech" 
+                                Content="Generate Speech" 
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Click="BtnGenerateSpeech_Click"
+                                Margin="0,0,8,0"
+                                Visibility="Collapsed"/>
+                        
+                        <Button x:Name="btnCreateDubbedVideo" 
+                                Content="Create Dubbed Video" 
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Click="BtnCreateDubbedVideo_Click"
+                                Margin="0,0,8,0"
+                                Visibility="Collapsed"/>
+                        
+                        <Button x:Name="btnTranslateText" 
+                                Content="Translate to Turkish" 
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Click="BtnTranslateText_Click"/>
                     </StackPanel>
                 </Grid>
             </Grid>

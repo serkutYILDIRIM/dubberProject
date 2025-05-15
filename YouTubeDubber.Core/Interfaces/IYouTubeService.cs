@@ -51,10 +51,10 @@ namespace YouTubeDubber.Core.Interfaces
         /// Downloads only the audio stream from a YouTube video
         /// </summary>
         /// <param name="videoUrl">The URL of the YouTube video</param>
-        /// <param name="outputFilePath">The path where the audio should be saved. If null, a default path will be used.</param>
-        /// <param name="progressCallback">Optional callback to report download progress</param>
+        /// <param name="outputFilePath">The path where the audio should be saved. If null, a default path will be used.</param>        /// <param name="progressCallback">Optional callback to report download progress</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>The path to the downloaded audio file</returns>        Task<string> DownloadAudioOnlyAsync(
+        /// <returns>The path to the downloaded audio file</returns>
+        Task<string> DownloadAudioOnlyAsync(
             string videoUrl,
             string? outputFilePath = null,
             IProgress<double>? progressCallback = null,

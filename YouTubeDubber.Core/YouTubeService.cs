@@ -15,7 +15,8 @@ namespace YouTubeDubber.Core
 {
     /// <summary>
     /// Implementation of the YouTube service using YoutubeExplode library
-    /// </summary>    public class YouTubeService : IYouTubeService
+    /// </summary>
+    public class YouTubeService : IYouTubeService
     {
         private readonly YoutubeClient _youtubeClient;
         private readonly string _downloadFolder;

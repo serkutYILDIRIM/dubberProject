@@ -51,6 +51,26 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Azure.AI.Translation.Text": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
+            "Microsoft.CognitiveServices.Speech": {
+              "target": "Package",
+              "version": "[1.43.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
+            "Xabe.FFmpeg": {
+              "target": "Package",
+              "version": "[6.0.1, )"
+            },
+            "Xabe.FFmpeg.Downloader": {
+              "target": "Package",
+              "version": "[6.0.1, )"
+            },
             "YoutubeExplode": {
               "target": "Package",
               "version": "[6.5.4, )"
@@ -435,6 +455,10 @@
             "MaterialDesignThemes": {
               "target": "Package",
               "version": "[5.2.1, )"
+            },
+            "Microsoft.CognitiveServices.Speech": {
+              "target": "Package",
+              "version": "[1.43.0, )"
             }
           },
           "imports": [

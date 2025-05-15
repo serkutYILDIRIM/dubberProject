@@ -22,8 +22,7 @@ namespace YouTubeDubber.Core.Services
         public AudioExtractorService()
         {
         }
-        
-        /// <summary>
+          /// <summary>
         /// Ensures FFmpeg is downloaded and available
         /// </summary>
         public async Task InitializeFFmpegAsync(CancellationToken cancellationToken = default)
@@ -31,7 +30,7 @@ namespace YouTubeDubber.Core.Services
             if (!_ffmpegInitialized)
             {
                 // Download FFmpeg if it's not already installed
-                await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, cancellationToken);
+                await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official);
                 _ffmpegInitialized = true;
             }
         }

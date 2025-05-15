@@ -10,3 +10,4 @@ c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\Y
 c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\refint\YouTubeDubber.Core.dll
 c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\YouTubeDubber.Core.pdb
 c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\ref\YouTubeDubber.Core.dll
+C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Debug\net8.0\YouTubeDubber.Core.sourcelink.json
