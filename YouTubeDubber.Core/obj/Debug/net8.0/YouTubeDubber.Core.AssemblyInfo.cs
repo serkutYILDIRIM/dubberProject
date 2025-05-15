@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("YouTubeDubber.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+38520cc4efb34035e81f6125fbd81b8d73b632d1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b016d24036d11ed4adc9459fd9796292e88aa21d")]
 [assembly: System.Reflection.AssemblyProductAttribute("YouTubeDubber.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("YouTubeDubber.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
