@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "+qMUoMxJM/4=",
+  "dgSpecHash": "CNKOB+3vQRk=",
   "success": true,
   "projectFilePath": "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj",
   "expectedPackageFiles": [
@@ -21,8 +21,8 @@
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\xabe.ffmpeg.downloader\\6.0.1\\xabe.ffmpeg.downloader.6.0.1.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\youtubeexplode\\6.5.4\\youtubeexplode.6.5.4.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\youtubeexplode.converter\\6.5.4\\youtubeexplode.converter.6.5.4.nupkg.sha512",
-    "C:\\Users\\serkut.yildirim\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.12\\microsoft.netcore.app.ref.8.0.12.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.12\\microsoft.windowsdesktop.app.ref.8.0.12.nupkg.sha512",
+    "C:\\Users\\serkut.yildirim\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.12\\microsoft.netcore.app.ref.8.0.12.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.12\\microsoft.aspnetcore.app.ref.8.0.12.nupkg.sha512"
   ],
   "logs": []

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "DZ8WdExRxE0=",
+  "dgSpecHash": "h5DFevIS1OE=",
   "success": true,
   "projectFilePath": "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.UI\\YouTubeDubber.UI.csproj",
   "expectedPackageFiles": [
@@ -25,8 +25,8 @@
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\xabe.ffmpeg.downloader\\6.0.1\\xabe.ffmpeg.downloader.6.0.1.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\youtubeexplode\\6.5.4\\youtubeexplode.6.5.4.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\youtubeexplode.converter\\6.5.4\\youtubeexplode.converter.6.5.4.nupkg.sha512",
-    "C:\\Users\\serkut.yildirim\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.12\\microsoft.netcore.app.ref.8.0.12.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.12\\microsoft.windowsdesktop.app.ref.8.0.12.nupkg.sha512",
+    "C:\\Users\\serkut.yildirim\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.12\\microsoft.netcore.app.ref.8.0.12.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.12\\microsoft.aspnetcore.app.ref.8.0.12.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.12\\microsoft.netcore.app.host.win-x64.8.0.12.nupkg.sha512"
   ],
@@ -34,8 +34,11 @@
     {
       "code": "NU1510",
       "level": "Warning",
+      "message": "PackageReference Microsoft.VisualBasic will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
+      "projectPath": "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.UI\\YouTubeDubber.UI.csproj",
       "warningLevel": 1,
-      "message": "PackageReference Microsoft.VisualBasic will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary."
+      "filePath": "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.UI\\YouTubeDubber.UI.csproj",
+      "targetGraphs": []
     }
   ]
 }

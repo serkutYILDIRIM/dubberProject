@@ -1,8 +1,3 @@
-C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\YouTubeDubber.UI.csproj.AssemblyReference.cache
-C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\MainWindow.g.cs
-C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\App.g.cs
-C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\YouTubeDubber.UI_MarkupCompile.cache
-C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\YouTubeDubber.UI_MarkupCompile.lref
 C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\bin\Debug\net8.0-windows\YouTubeDubber.UI.exe
 C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\bin\Debug\net8.0-windows\YouTubeDubber.UI.deps.json
 C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\bin\Debug\net8.0-windows\YouTubeDubber.UI.runtimeconfig.json
@@ -108,6 +103,11 @@ C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\Y
 C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\bin\Debug\net8.0-windows\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
 C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\bin\Debug\net8.0-windows\YouTubeDubber.Core.dll
 C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\bin\Debug\net8.0-windows\YouTubeDubber.Core.pdb
+C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\YouTubeDubber.UI.csproj.AssemblyReference.cache
+C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\MainWindow.g.cs
+C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\App.g.cs
+C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\YouTubeDubber.UI_MarkupCompile.cache
+C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\YouTubeDubber.UI_MarkupCompile.lref
 C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\App.baml
 C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\MainWindow.baml
 C:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.UI\obj\Debug\net8.0-windows\YouTubeDubber.UI.g.resources

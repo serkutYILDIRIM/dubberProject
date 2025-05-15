@@ -39,17 +39,12 @@ namespace YouTubeDubber.Core.Services
         public async Task<TranslationResult> TranslateTextAsync(
             string text,
             TranslationOptions? options = null,
-            IProgress<double>? progressCallback = null,
             CancellationToken cancellationToken = default)
         {
             // Use provided options or fall back to default options
             options ??= _defaultOptions;
-            
-            try
+              try
             {
-                // Report initial progress
-                progressCallback?.Report(0.1);
-                
                 // Create request body
                 var requestBody = new[] {
                     new { Text = text }
@@ -66,15 +61,9 @@ namespace YouTubeDubber.Core.Services
                 requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", options.ApiKey);
                 requestMessage.Headers.Add("Ocp-Apim-Subscription-Region", options.Region);
                 
-                // Report progress
-                progressCallback?.Report(0.3);
-                
                 // Send request
                 var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
                 response.EnsureSuccessStatusCode();
-                
-                // Report progress
-                progressCallback?.Report(0.7);
                 
                 // Parse response
                 var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -87,9 +76,6 @@ namespace YouTubeDubber.Core.Services
                 
                 // Extract translated text
                 var translatedText = translations[0].translations[0].text.ToString();
-                
-                // Report completion
-                progressCallback?.Report(1.0);
                 
                 // Create result
                 return new TranslationResult
@@ -104,6 +90,71 @@ namespace YouTubeDubber.Core.Services
             catch (Exception ex)
             {
                 throw new Exception($"Translation failed: {ex.Message}", ex);
+            }
+        }
+        
+        /// <summary>
+        /// Translates multiple text strings in batch
+        /// </summary>
+        public async Task<IList<TranslationResult>> TranslateTextsAsync(
+            IList<string> texts,
+            TranslationOptions? options = null,
+            CancellationToken cancellationToken = default)
+        {
+            // Use provided options or fall back to default options
+            options ??= _defaultOptions;
+            
+            try
+            {
+                var results = new List<TranslationResult>();
+                
+                // Create request body for batch translation
+                var requestBody = texts.Select(text => new { Text = text }).ToArray();
+                
+                var requestJson = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
+                
+                // Setup request
+                var route = $"/translate?api-version=3.0&from={options.SourceLanguage}&to={options.TargetLanguage}";
+                
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Post, route);
+                requestMessage.Content = content;
+                requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", options.ApiKey);
+                requestMessage.Headers.Add("Ocp-Apim-Subscription-Region", options.Region);
+                
+                // Send request
+                var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                
+                // Parse response
+                var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
+                var translations = JsonConvert.DeserializeObject<List<dynamic>>(responseJson);
+                
+                if (translations == null || translations.Count == 0)
+                {
+                    throw new InvalidOperationException("No translation results were returned");
+                }
+                
+                // Process each translation result
+                for (int i = 0; i < Math.Min(texts.Count, translations.Count); i++)
+                {
+                    var translatedText = translations[i].translations[0].text.ToString();
+                    
+                    results.Add(new TranslationResult
+                    {
+                        SourceText = texts[i],
+                        TranslatedText = translatedText,
+                        SourceLanguage = options.SourceLanguage,
+                        TargetLanguage = options.TargetLanguage,
+                        TranslationTime = DateTime.Now
+                    });
+                }
+                
+                return results;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Batch translation failed: {ex.Message}", ex);
             }
         }
         
