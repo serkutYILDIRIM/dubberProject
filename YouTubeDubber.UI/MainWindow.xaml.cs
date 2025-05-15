@@ -59,9 +59,7 @@ public partial class MainWindow : Window
             EnableWordLevelTimestamps = true
         };
         
-        _speechRecognitionService = new AzureSpeechRecognitionService(speechOptions);
-        
-        // Initialize translation service
+        _speechRecognitionService = new AzureSpeechRecognitionService(speechOptions);        // Initialize translation service
         var translationOptions = new TranslationOptions
         {
             ApiKey = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_KEY") ?? "",
@@ -70,7 +68,8 @@ public partial class MainWindow : Window
             TargetLanguage = "tr"
         };
         
-        _translationService = new AzureTranslationService(translationOptions);
+        // Create translation service using factory method
+        _translationService = CreateTranslationService(translationOptions);
         
         // Initialize text-to-speech service
         var ttsOptions = new TextToSpeechOptions
@@ -88,6 +87,23 @@ public partial class MainWindow : Window
         
         // Initialize FFmpeg in the background
         InitializeFFmpegAsync();
+    }
+    
+    /// <summary>
+    /// Creates a translation service with the specified options
+    /// </summary>
+    private ITranslationService CreateTranslationService(TranslationOptions options)
+    {
+        // Create an instance of AzureTranslationService without directly referencing the type
+        // Use reflection to create the instance
+        var type = Type.GetType("YouTubeDubber.Core.Services.AzureTranslationService, YouTubeDubber.Core");
+        if (type == null)
+        {
+            throw new InvalidOperationException("AzureTranslationService type not found");
+        }
+        
+        // Create an instance using the constructor that takes TranslationOptions
+        return (ITranslationService)Activator.CreateInstance(type, options);
     }
     
     /// <summary>
@@ -1010,10 +1026,10 @@ public partial class MainWindow : Window
         
         return Task.FromResult(true);
     }
-    
-    /// <summary>
+      /// <summary>
     /// Shows a dialog to collect Azure Speech Service credentials
-    /// </summary>    private Task<bool> ShowCredentialsDialog()
+    /// </summary>
+    private Task<bool> ShowCredentialsDialog()
     {
         // For simplicity, we'll use a message box to get the credentials
         // In a real app, you would create a proper dialog with input fields
@@ -1231,8 +1247,7 @@ public partial class MainWindow : Window
     private async void BtnCreateDubbedVideo_Click(object sender, RoutedEventArgs e)
     {
         try
-        {
-            if (_currentVideoInfo == null || string.IsNullOrEmpty(_currentVideoInfo.LocalVideoPath))
+        {            if (_currentVideoInfo == null || string.IsNullOrEmpty(_currentVideoInfo.LocalFilePath))
             {
                 MessageBox.Show("No video available for dubbing", "Dubbing Error", 
                     MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -1276,10 +1291,9 @@ public partial class MainWindow : Window
             
             // Create directory if it doesn't exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-            
-            // Merge audio and video
+              // Merge audio and video
             _lastDubbedVideoPath = await _audioVideoMergeService.MergeAudioVideoAsync(
-                _currentVideoInfo.LocalVideoPath,
+                _currentVideoInfo.LocalFilePath,
                 _lastSynthesizedAudioPath,
                 outputPath,
                 keepOriginalAudio,

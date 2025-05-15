@@ -10,6 +10,8 @@ using Microsoft.CognitiveServices.Speech.Audio;
 using Newtonsoft.Json;
 using YouTubeDubber.Core.Interfaces;
 using YouTubeDubber.Core.Models;
+// Use alias to avoid ambiguity with Microsoft's SpeechSynthesisResult
+using AzureSpeechResult = Microsoft.CognitiveServices.Speech.SpeechSynthesisResult;
 
 namespace YouTubeDubber.Core.Services
 {
@@ -76,9 +78,8 @@ namespace YouTubeDubber.Core.Services
                 
                 // Report progress
                 progressCallback?.Report(0.2);
-                
-                // Prepare text for synthesis
-                SpeechSynthesisResult? result;
+                  // Prepare text for synthesis
+                AzureSpeechResult? result;
                 
                 if (options.UseSSML)
                 {
@@ -154,9 +155,8 @@ namespace YouTubeDubber.Core.Services
                 
                 // Report initial progress
                 progressCallback?.Report(0.1);
-                
-                // If the translation has segments with timing, synthesize each segment separately
-                if (translationResult.Segments != null && translationResult.Segments.Count > 0)
+                  // If the translation has segments with timing, synthesize each segment separately
+                if (translationResult.TranslatedSegments != null && translationResult.TranslatedSegments.Count > 0)
                 {
                     // TODO: For a complete solution, we would need to:
                     // 1. Synthesize each segment separately
@@ -316,11 +316,9 @@ namespace YouTubeDubber.Core.Services
                         48000 => SpeechSynthesisOutputFormat.Audio48Khz96KBitRateMonoMp3,
                         _ => SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3  // Default
                     };
-                    
-                case "ogg":
+                      case "ogg":
                     return samplingRate switch
                     {
-                        8000 => SpeechSynthesisOutputFormat.Ogg8Khz16BitMonoOpus,
                         16000 => SpeechSynthesisOutputFormat.Ogg16Khz16BitMonoOpus,
                         24000 => SpeechSynthesisOutputFormat.Ogg24Khz16BitMonoOpus,
                         48000 => SpeechSynthesisOutputFormat.Ogg48Khz16BitMonoOpus,

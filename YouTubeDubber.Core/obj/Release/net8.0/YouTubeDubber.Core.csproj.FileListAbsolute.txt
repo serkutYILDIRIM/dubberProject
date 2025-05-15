@@ -1,5 +1,0 @@
-c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Release\net8.0\YouTubeDubber.Core.csproj.AssemblyReference.cache
-c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Release\net8.0\YouTubeDubber.Core.GeneratedMSBuildEditorConfig.editorconfig
-c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Release\net8.0\YouTubeDubber.Core.AssemblyInfoInputs.cache
-c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Release\net8.0\YouTubeDubber.Core.AssemblyInfo.cs
-c:\Users\serkut.yildirim\OneDrive - Veripark Yazilim A.S\Desktop\dublajproject\YouTubeDubber.Core\obj\Release\net8.0\YouTubeDubber.Core.csproj.CoreCompileInputs.cache

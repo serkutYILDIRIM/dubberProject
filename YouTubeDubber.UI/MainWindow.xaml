@@ -119,20 +119,19 @@
                                    Margin="0,16,0,0" 
                                    MaxHeight="120"
                                    VerticalAlignment="Top"
-                                   TextTrimming="CharacterEllipsis"/>
-                          <StackPanel Orientation="Vertical" Margin="0,16,0,0" Spacing="8">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                   TextTrimming="CharacterEllipsis"/>                          <StackPanel Orientation="Vertical" Margin="0,16,0,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Button x:Name="btnDownloadVideo" 
                                         Content="Download Video" 
                                         Style="{StaticResource MaterialDesignRaisedButton}"
                                         Click="BtnDownloadVideo_Click"/>
-                                
-                                <Button x:Name="btnDownloadAudio" 
-                                        Content="Download Audio" 
+                                  <Button x:Name="btnDownloadAudio" 
+                                        Content="Download Audio"
                                         Style="{StaticResource MaterialDesignOutlinedButton}"
                                         Click="BtnDownloadAudio_Click"/>
                             </StackPanel>
                               <Button x:Name="btnExtractSpeechAudio" 
+                                    Margin="0,8,0,0"
                                     Content="Extract Speech-Optimized Audio" 
                                     Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
                                     Click="BtnExtractSpeechAudio_Click"/>

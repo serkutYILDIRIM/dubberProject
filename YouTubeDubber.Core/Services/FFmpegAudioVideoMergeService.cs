@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Xabe.FFmpeg;
+using Xabe.FFmpeg.Downloader;
 using YouTubeDubber.Core.Interfaces;
 
 namespace YouTubeDubber.Core.Services
@@ -77,24 +78,26 @@ namespace YouTubeDubber.Core.Services
 
                 // Create conversion
                 IConversion conversion;
-                
-                if (keepOriginalAudio)
+                  if (keepOriginalAudio)
                 {
                     // Keep original audio and mix with new audio
-                    conversion = await FFmpeg.Conversions.FromSnippet.MergeVideoAndAudio(
-                        videoFilePath,
-                        audioFilePath,
-                        outputFilePath,
-                        originalAudioVolume,
-                        newAudioVolume);
+                    conversion = FFmpeg.Conversions.New()
+                        .AddParameter($"-i \"{videoFilePath}\"")
+                        .AddParameter($"-i \"{audioFilePath}\"")
+                        .AddParameter($"-filter_complex \"[0:a]volume={originalAudioVolume}[a1];[1:a]volume={newAudioVolume}[a2];[a1][a2]amix=inputs=2:duration=longest[aout]\"")
+                        .AddParameter("-map 0:v -map \"[aout]\"")
+                        .AddParameter("-c:v copy")
+                        .SetOutput(outputFilePath);
                 }
                 else
                 {
                     // Replace original audio with new audio
-                    conversion = await FFmpeg.Conversions.FromSnippet.ReplaceAudio(
-                        videoFilePath,
-                        audioFilePath,
-                        outputFilePath);
+                    conversion = FFmpeg.Conversions.New()
+                        .AddParameter($"-i \"{videoFilePath}\"")
+                        .AddParameter($"-i \"{audioFilePath}\"")
+                        .AddParameter("-map 0:v -map 1:a")
+                        .AddParameter("-c:v copy -c:a aac")
+                        .SetOutput(outputFilePath);
                 }
                 
                 // Report progress after setting up conversion

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj": {}
+    "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj": {}
   },
   "projects": {
-    "c:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj": {
+    "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj",
+        "projectUniqueName": "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj",
         "projectName": "YouTubeDubber.Core",
-        "projectPath": "c:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj",
+        "projectPath": "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj",
         "packagesPath": "C:\\Users\\serkut.yildirim\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\obj\\",
+        "outputPath": "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "GuNlefLovok=",
+  "dgSpecHash": "+qMUoMxJM/4=",
   "success": true,
-  "projectFilePath": "c:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj",
+  "projectFilePath": "C:\\Users\\serkut.yildirim\\OneDrive - Veripark Yazilim A.S\\Desktop\\dublajproject\\YouTubeDubber.Core\\YouTubeDubber.Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\anglesharp\\1.2.0\\anglesharp.1.2.0.nupkg.sha512",
     "C:\\Users\\serkut.yildirim\\.nuget\\packages\\azure.ai.translation.text\\1.0.0\\azure.ai.translation.text.1.0.0.nupkg.sha512",

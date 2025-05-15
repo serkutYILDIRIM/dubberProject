@@ -1,4 +1,4 @@
-using System;
+ using System;
 using System.Collections.Generic;
 
 namespace YouTubeDubber.Core.Models
@@ -37,6 +37,11 @@ namespace YouTubeDubber.Core.Models
         /// Translated version of transcription segments with timing information preserved
         /// </summary>
         public List<TranslatedSegment>? TranslatedSegments { get; set; }
+        
+        /// <summary>
+        /// Count of segments for easier property access
+        /// </summary>
+        public int Count => TranslatedSegments?.Count ?? 0;
     }
     
     /// <summary>
