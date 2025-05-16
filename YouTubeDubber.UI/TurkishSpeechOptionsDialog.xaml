@@ -1,0 +1,124 @@
+<Window x:Class="YouTubeDubber.UI.TurkishSpeechOptionsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YouTubeDubber.UI"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Turkish Speech Options" 
+        Height="500" Width="600"
+        WindowStartupLocation="CenterOwner"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+    
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <TextBlock Text="Configure Turkish Speech Options" 
+                   Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                   Margin="0,0,0,16"/>
+        
+        <!-- Options -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,8,0,0">
+                <!-- Voice Selection Options -->
+                <GroupBox Header="Voice Selection" Style="{StaticResource MaterialDesignGroupBox}" Margin="0,0,0,16">
+                    <StackPanel Margin="8">
+                        <CheckBox x:Name="chkAutoVoiceSelection" 
+                                  Content="Automatically select the most appropriate Turkish voice based on content"
+                                  IsChecked="True"
+                                  Margin="0,0,0,8"
+                                  Checked="ChkAutoVoiceSelection_CheckedChanged"
+                                  Unchecked="ChkAutoVoiceSelection_CheckedChanged"/>
+                        
+                        <StackPanel x:Name="voiceSelectionPanel" Visibility="Collapsed" Margin="0,8,0,0">
+                            <TextBlock Text="Select a Turkish voice:" Margin="0,0,0,8"/>
+                            <ComboBox x:Name="cmbVoiceSelection"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="0,0,0,8"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+                
+                <!-- Speaking Style Options -->
+                <GroupBox Header="Speaking Style" Style="{StaticResource MaterialDesignGroupBox}" Margin="0,0,0,16">
+                    <StackPanel Margin="8">
+                        <TextBlock Text="Select a speaking style:" Margin="0,0,0,8"/>
+                        <ComboBox x:Name="cmbSpeakingStyle"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                  Margin="0,0,0,8"/>
+                    </StackPanel>
+                </GroupBox>
+                
+                <!-- Speech Rate and Pitch Options -->
+                <GroupBox Header="Speech Rate and Pitch" Style="{StaticResource MaterialDesignGroupBox}" Margin="0,0,0,16">
+                    <StackPanel Margin="8">
+                        <TextBlock Text="Speech Rate:" Margin="0,0,0,4"/>
+                        <Slider x:Name="sliderSpeechRate" 
+                                Minimum="0.5" Maximum="2.0" 
+                                Value="1.0" 
+                                TickFrequency="0.1" 
+                                TickPlacement="BottomRight" 
+                                IsSnapToTickEnabled="True"
+                                AutoToolTipPlacement="TopLeft"
+                                AutoToolTipPrecision="1"
+                                Margin="0,0,0,16"/>
+                        
+                        <TextBlock Text="Pitch Adjustment:" Margin="0,0,0,4"/>
+                        <Slider x:Name="sliderPitchAdjustment" 
+                                Minimum="-20" Maximum="20" 
+                                Value="0" 
+                                TickFrequency="5" 
+                                TickPlacement="BottomRight" 
+                                IsSnapToTickEnabled="True"
+                                AutoToolTipPlacement="TopLeft"
+                                AutoToolTipPrecision="0"/>
+                    </StackPanel>
+                </GroupBox>
+                
+                <!-- Advanced Options -->
+                <GroupBox Header="Advanced Options" Style="{StaticResource MaterialDesignGroupBox}">
+                    <StackPanel Margin="8">
+                        <CheckBox x:Name="chkUseSSML" 
+                                  Content="Use SSML for enhanced Turkish pronunciation and intonation"
+                                  IsChecked="True"
+                                  Margin="0,0,0,8"/>
+                                  
+                        <TextBlock Text="Output Format:" Margin="0,8,0,4"/>
+                        <ComboBox x:Name="cmbOutputFormat"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                            <ComboBoxItem Content="WAV (High Quality)" IsSelected="True"/>
+                            <ComboBoxItem Content="MP3 (Compressed)"/>
+                        </ComboBox>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Action Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="btnCancel" 
+                    Content="Cancel" 
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Click="BtnCancel_Click"
+                    Margin="0,0,8,0"/>
+            
+            <Button x:Name="btnOK" 
+                    Content="OK" 
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Click="BtnOK_Click"
+                    IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

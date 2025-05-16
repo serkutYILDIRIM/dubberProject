@@ -1127,8 +1127,7 @@ public partial class MainWindow : Window
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }
-    
-    /// <summary>
+      /// <summary>
     /// Handle the generate speech button click
     /// </summary>
     private async void BtnGenerateSpeech_Click(object sender, RoutedEventArgs e)
@@ -1183,19 +1182,30 @@ public partial class MainWindow : Window
                     return;
                 }
             }
-              // Configure synthesis options
-            var options = await ShowSpeechSynthesisOptionsDialog();
-            if (options == null)
+              
+            // Create base options with credentials
+            var options = new TextToSpeechOptions
+            {
+                ApiKey = apiKey,
+                Region = region,
+                LanguageCode = "tr-TR"
+            };
+            
+            // Show the new Turkish speech options dialog
+            var optionsDialog = new TurkishSpeechOptionsDialog(
+                _textToSpeechService, 
+                _currentTranslation.TranslatedText, 
+                options);
+            
+            optionsDialog.Owner = this;
+            
+            if (optionsDialog.ShowDialog() != true)
             {
                 return; // User canceled
             }
             
-            // Update options with credentials
-            options.ApiKey = apiKey;
-            options.Region = region;
-            
-            // Enable SSML for better Turkish pronunciation
-            options.UseSSML = true;
+            // Get the speech options from the dialog
+            options = optionsDialog.SpeechOptions;
             
             // Show progress UI
             downloadProgressGrid.Visibility = Visibility.Visible;
@@ -1214,14 +1224,14 @@ public partial class MainWindow : Window
             string outputPath = Path.Combine(
                 _downloadsFolderPath,
                 "Synthesized",
-                $"{fileName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.wav");
+                $"{fileName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.{options.OutputFormat}");
             
             // Create directory if it doesn't exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
             
-            // Generate speech
-            _lastSynthesizedAudioPath = await _textToSpeechService.SynthesizeTranslationAsync(
-                _currentTranslation, 
+            // Generate speech using the specialized Turkish method
+            _lastSynthesizedAudioPath = await _textToSpeechService.SynthesizeTurkishSpeechAsync(
+                _currentTranslation.TranslatedText, 
                 outputPath,
                 options,
                 progress,
@@ -1232,14 +1242,14 @@ public partial class MainWindow : Window
             
             // Show success message
             MessageBox.Show(
-                $"Speech generated successfully and saved to:\n{_lastSynthesizedAudioPath}",
-                "Speech Generation Complete",
+                $"Turkish speech generated successfully with enhanced natural intonation!\n\nSaved to:\n{_lastSynthesizedAudioPath}",
+                "Turkish Speech Generation Complete",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error generating speech: {ex.Message}",
+            MessageBox.Show($"Error generating Turkish speech: {ex.Message}",
                 "Speech Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
@@ -1249,8 +1259,7 @@ public partial class MainWindow : Window
             SetLoadingState(false);
         }
     }
-    
-    /// <summary>
+      /// <summary>
     /// Handle the create dubbed video button click
     /// </summary>
     private async void BtnCreateDubbedVideo_Click(object sender, RoutedEventArgs e)
@@ -1270,18 +1279,22 @@ public partial class MainWindow : Window
                 return;
             }
             
-            // Show prompt for keeping original audio
-            var keepOriginalAudio = MessageBox.Show(
-                "Would you like to keep the original audio as background?\n\n" +
-                "If you select Yes, the original audio will be mixed with the synthesized speech at a lower volume.\n" +
-                "If you select No, only the synthesized speech will be used.",
-                "Keep Original Audio?",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question) == MessageBoxResult.Yes;
+            // Show the Turkish dubbing options dialog
+            var optionsDialog = new TurkishDubbingOptionsDialog();
+            optionsDialog.Owner = this;
+            
+            if (optionsDialog.ShowDialog() != true)
+            {
+                // User canceled
+                return;
+            }
+            
+            // Get the user's dubbing options
+            var dubbingOptions = optionsDialog.DubbingOptions;
             
             // Show progress UI
             downloadProgressGrid.Visibility = Visibility.Visible;
-            txtDownloadStatus.Text = "Creating dubbed video...";
+            txtDownloadStatus.Text = "Creating Turkish dubbed video...";
             SetLoadingState(true);
             
             // Create a progress reporter
@@ -1296,25 +1309,24 @@ public partial class MainWindow : Window
             string outputPath = Path.Combine(
                 _downloadsFolderPath,
                 "Dubbed",
-                $"{fileName.Replace(" ", "_")}_dubbed_{DateTime.Now:yyyyMMdd_HHmmss}.mp4");
+                $"{fileName.Replace(" ", "_")}_turkish_dubbed_{DateTime.Now:yyyyMMdd_HHmmss}.{dubbingOptions.OutputFormat}");
             
             // Create directory if it doesn't exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-              // Merge audio and video
-            _lastDubbedVideoPath = await _audioVideoMergeService.MergeAudioVideoAsync(
+            
+            // Create the dubbed video with enhanced options
+            _lastDubbedVideoPath = await _audioVideoMergeService.CreateTurkishDubbedVideoAsync(
                 _currentVideoInfo.LocalFilePath,
                 _lastSynthesizedAudioPath,
                 outputPath,
-                keepOriginalAudio,
-                keepOriginalAudio ? 0.2f : 0.0f, // Original audio volume if kept
-                1.0f, // New audio volume
+                dubbingOptions,
                 progress,
                 CancellationToken.None);
             
             // Show success message with option to play the video
             var playResult = MessageBox.Show(
-                $"Dubbed video created successfully and saved to:\n{_lastDubbedVideoPath}\n\nWould you like to play it now?",
-                "Video Dubbing Complete",
+                $"Turkish dubbed video created successfully with enhanced audio mixing!\n\nSaved to:\n{_lastDubbedVideoPath}\n\nWould you like to play it now?",
+                "Turkish Dubbing Complete",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Information);
                 
@@ -1330,8 +1342,8 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error creating dubbed video: {ex.Message}",
-                "Dubbing Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Error creating Turkish dubbed video: {ex.Message}",
+                "Turkish Dubbing Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {

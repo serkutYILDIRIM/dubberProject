@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using YouTubeDubber.Core.Models;
 
 namespace YouTubeDubber.Core.Interfaces
 {
@@ -29,6 +30,48 @@ namespace YouTubeDubber.Core.Interfaces
             bool keepOriginalAudio = false,
             float originalAudioVolume = 0.1f,
             float newAudioVolume = 1.0f,
+            IProgress<double>? progressCallback = null,
+            CancellationToken cancellationToken = default);
+            
+        /// <summary>
+        /// Creates a dubbed video with enhanced audio mixing for Turkish dubbing
+        /// </summary>
+        /// <param name="videoFilePath">Path to the original video file</param>
+        /// <param name="dubbingAudioPath">Path to the Turkish dubbing audio file</param>
+        /// <param name="outputFilePath">Path to save the dubbed video</param>
+        /// <param name="preserveBackgroundSounds">Whether to extract and preserve background sounds</param>
+        /// <param name="addSubtitles">Whether to add Turkish subtitles to the video</param>
+        /// <param name="subtitlesFilePath">Path to the subtitles file (if adding subtitles)</param>
+        /// <param name="mixingProfile">Audio mixing profile to use (background, music, voice, balanced)</param>
+        /// <param name="progressCallback">Optional callback to report progress</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Path to the dubbed video file</returns>
+        Task<string> CreateTurkishDubbedVideoAsync(
+            string videoFilePath,
+            string dubbingAudioPath,
+            string outputFilePath,
+            bool preserveBackgroundSounds = true,
+            bool addSubtitles = false,
+            string? subtitlesFilePath = null,
+            string mixingProfile = "balanced",
+            IProgress<double>? progressCallback = null,
+            CancellationToken cancellationToken = default);
+            
+        /// <summary>
+        /// Creates a Turkish dubbed video with enhanced options
+        /// </summary>
+        /// <param name="videoFilePath">Path to the original video file</param>
+        /// <param name="dubbingAudioPath">Path to the Turkish dubbing audio file</param>
+        /// <param name="outputFilePath">Path to save the dubbed video</param>
+        /// <param name="options">Turkish dubbing options</param>
+        /// <param name="progressCallback">Optional callback to report progress</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Path to the dubbed video file</returns>
+        Task<string> CreateTurkishDubbedVideoAsync(
+            string videoFilePath,
+            string dubbingAudioPath,
+            string outputFilePath,
+            TurkishDubbingOptions options,
             IProgress<double>? progressCallback = null,
             CancellationToken cancellationToken = default);
     }
