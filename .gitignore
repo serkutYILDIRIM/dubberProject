@@ -87,3 +87,60 @@ project.lock.json
 .DS_Store
 *.pyc
 nupkg/
+
+###################
+# Additional ignores for YouTubeDubber project
+###################
+
+# FFmpeg related
+**/ffmpeg/
+**/ffmpeg.exe
+**/ffprobe.exe
+**/ffplay.exe
+**/Xabe.FFmpeg/
+
+# Downloaded content
+**/Downloads/
+**/Downloaded/
+**/Dubbed/
+*.mp3
+*.mp4
+*.wav
+*.flac
+*.ogg
+*.webm
+
+# Temporary files
+**/temp/
+**/tmp/
+*.tmp
+**/cache/
+
+# Visual Studio and .NET additional files
+*.binlog
+*.deploymenttarget
+*.pidb
+*.svclog
+*.dotCover
+*.DotSettings.user
+*.GhostDoc.xml
+*.opendb
+*.opensdf
+*.sdf
+*.pfx
+*.publishsettings
+Orleans.codegen.*
+
+# Build results
+[Dd]ebugPublic/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+msbuild.log
+msbuild.err
+msbuild.wrn
