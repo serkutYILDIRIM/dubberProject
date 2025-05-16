@@ -27,12 +27,13 @@ namespace YouTubeDubber.Core.Services
                 { "balanced", (0.3f, 1.0f, 0.85f) },        // Balanced mix
                 { "voice-centered", (0.1f, 1.2f, 0.95f) }   // Maximum voice clarity
             };
-        
-        /// <summary>
+          /// <summary>
         /// Initializes a new instance of the FFmpeg Audio-Video Merge Service
         /// </summary>
         public FFmpegAudioVideoMergeService()
         {
+            // Don't block constructor, but start initialization in the background
+            Task.Run(async () => await InitializeFFmpegAsync()).ConfigureAwait(false);
         }
         
         /// <summary>

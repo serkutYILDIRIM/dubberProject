@@ -2,12 +2,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\YouTubeDubber.Core\YouTubeDubber.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="MaterialDesignThemes" Version="5.2.1" />
+  </ItemGroup>  <ItemGroup>
+    <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
+    <PackageReference Include="MaterialDesignColors" Version="2.1.4" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.43.0" />
-  </ItemGroup>
-    <ItemGroup>
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
   </ItemGroup>
 
