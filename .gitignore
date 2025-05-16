@@ -99,6 +99,21 @@ nupkg/
 **/ffplay.exe
 **/Xabe.FFmpeg/
 
+# Runtime specific
+**/runtimes/
+**/*.baml
+
+# Project specific
+**/AssemblyInfo.cache
+**/AssemblyInfoInputs.cache
+**/AssemblyReference.cache
+**/YouTubeDubber.*.csproj_*
+**/*.GeneratedMSBuildEditorConfig.editorconfig
+**/*.assets.cache
+**/*.csproj.CoreCompileInputs.cache
+**/*.csproj.FileListAbsolute.txt
+**/*.GlobalUsings.g.cs
+
 # Downloaded content
 **/Downloads/
 **/Downloaded/
