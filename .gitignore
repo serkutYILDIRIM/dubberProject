@@ -103,9 +103,13 @@ nupkg/
 **/runtimes/
 **/*.baml
 **/_wpftmp*.*
-**/*_wpftmp.*.cache
+**/*_wpftmp*.*
+**/*.designer.*
+**/*_wpftmp.csproj*
 **/*.g.resources
 **/*.xaml.resources
+**/*.designer.deps.json
+**/*.designer.runtimeconfig.json
 
 # Project specific
 **/AssemblyInfo.cache
@@ -162,6 +166,7 @@ nupkg/
 **/*.tmp
 **/*.vspscc
 **/*.vssscc
+**/*.BuildWithSkipAnalyzers
 
 # Visual Studio and .NET additional files
 *.binlog
