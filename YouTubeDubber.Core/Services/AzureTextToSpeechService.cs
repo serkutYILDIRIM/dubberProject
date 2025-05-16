@@ -110,8 +110,7 @@ namespace YouTubeDubber.Core.Services
                 throw new Exception($"Speech synthesis failed: {ex.Message}", ex);
             }
         }
-        
-        /// <summary>
+          /// <summary>
         /// Synthesizes speech from a translation result, preserving timing information
         /// </summary>
         public async Task<string> SynthesizeTranslationAsync(
@@ -137,6 +136,19 @@ namespace YouTubeDubber.Core.Services
             
             try
             {
+                // Check if this is a Turkish translation and use specialized method if needed
+                if (options.LanguageCode?.StartsWith("tr-") == true || translationResult.TargetLanguage?.StartsWith("tr") == true)
+                {
+                    // Use the specialized Turkish synthesis method for better results
+                    return await SynthesizeTurkishSpeechAsync(
+                        translationResult.TranslatedText,
+                        outputFilePath,
+                        options,
+                        progressCallback,
+                        cancellationToken);
+                }
+                
+                // For non-Turkish languages, use the standard approach
                 // Create speech config
                 var speechConfig = CreateSpeechConfig(options);
                 
@@ -155,7 +167,8 @@ namespace YouTubeDubber.Core.Services
                 
                 // Report initial progress
                 progressCallback?.Report(0.1);
-                  // If the translation has segments with timing, synthesize each segment separately
+                
+                // If the translation has segments with timing, synthesize each segment separately
                 if (translationResult.TranslatedSegments != null && translationResult.TranslatedSegments.Count > 0)
                 {
                     // TODO: For a complete solution, we would need to:
@@ -397,6 +410,91 @@ namespace YouTubeDubber.Core.Services
             
             sb.AppendLine("</speak>");
             return sb.ToString();
+        }
+        
+        /// <summary>
+        /// Specialized method for synthesizing Turkish text to speech with enhanced naturalness
+        /// </summary>
+        public async Task<string> SynthesizeTurkishSpeechAsync(
+            string text,
+            string outputFilePath,
+            TextToSpeechOptions? options = null,
+            IProgress<double>? progressCallback = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new ArgumentException("Text to synthesize cannot be empty", nameof(text));
+            }
+            
+            // Use provided options or fall back to default options
+            options ??= _defaultOptions;
+            
+            // Ensure language code is set to Turkish
+            options.LanguageCode = "tr-TR";
+            
+            // If voice name is not specified, use recommended Turkish voice
+            if (string.IsNullOrEmpty(options.VoiceName))
+            {
+                options.VoiceName = YouTubeDubber.Core.Helpers.TurkishVoiceHelper.GetRecommendedMaleVoice();
+            }
+            
+            // Apply Turkish-specific text formatting to improve pronunciation
+            text = YouTubeDubber.Core.Helpers.TurkishVoiceHelper.FormatTextForTurkishSpeech(text);
+            
+            // Enable SSML for better Turkish pronunciation
+            options.UseSSML = true;
+            
+            try
+            {
+                // Create speech config
+                var speechConfig = CreateSpeechConfig(options);
+                
+                // Set up audio output configuration
+                string directory = Path.GetDirectoryName(outputFilePath) ?? string.Empty;
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+                
+                // Report initial progress
+                progressCallback?.Report(0.1);
+                
+                // Create audio output configuration
+                using var audioConfig = AudioConfig.FromWavFileOutput(outputFilePath);
+                
+                // Create speech synthesizer
+                using var synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
+                
+                // Report progress
+                progressCallback?.Report(0.2);
+                
+                // Generate Turkish-specific SSML
+                string ssml = YouTubeDubber.Core.Helpers.TurkishVoiceHelper.GenerateTurkishSSML(
+                    text, 
+                    options.VoiceName,
+                    options.SpeakingRate,
+                    options.PitchAdjustment);
+                
+                // Synthesize speech using SSML
+                var result = await synthesizer.SpeakSsmlAsync(ssml);
+                
+                // Check synthesis result
+                if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                    throw new Exception($"Speech synthesis canceled: {cancellation.Reason}, Error code: {cancellation.ErrorCode}, Error details: {cancellation.ErrorDetails}");
+                }
+                
+                // Report successful completion
+                progressCallback?.Report(1.0);
+                
+                return outputFilePath;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Turkish speech synthesis failed: {ex.Message}", ex);
+            }
         }
         
         #endregion

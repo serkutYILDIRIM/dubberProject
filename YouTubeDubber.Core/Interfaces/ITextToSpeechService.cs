@@ -56,6 +56,22 @@ namespace YouTubeDubber.Core.Interfaces
             CancellationToken cancellationToken = default);
             
         /// <summary>
+        /// Specialized method for synthesizing Turkish text to speech with enhanced naturalness
+        /// </summary>
+        /// <param name="text">The Turkish text to synthesize</param>
+        /// <param name="outputFilePath">Path to save the generated audio file</param>
+        /// <param name="options">Text-to-speech configuration options</param>
+        /// <param name="progressCallback">Optional callback to report synthesis progress</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Path to the generated audio file</returns>
+        Task<string> SynthesizeTurkishSpeechAsync(
+            string text,
+            string outputFilePath,
+            TextToSpeechOptions? options = null,
+            IProgress<double>? progressCallback = null,
+            CancellationToken cancellationToken = default);
+            
+        /// <summary>
         /// Validates the text-to-speech service API credentials
         /// </summary>
         /// <param name="options">Text-to-speech configuration options</param>
