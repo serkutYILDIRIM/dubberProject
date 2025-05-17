@@ -61,6 +61,21 @@ namespace YouTubeDubber.Core.Helpers
         public static string GetRecommendedFemaleVoice() => "tr-TR-EmelNeural";
         
         /// <summary>
+        /// Gets a formal/professional male Turkish voice
+        /// </summary>
+        public static string GetRecommendedFormalMaleVoice() => "tr-TR-AhmetNeural";
+        
+        /// <summary>
+        /// Gets a formal/professional female Turkish voice
+        /// </summary>
+        public static string GetRecommendedFormalFemaleVoice() => "tr-TR-FilizNeural";
+        
+        /// <summary>
+        /// Gets a child/young-sounding Turkish voice
+        /// </summary>
+        public static string GetRecommendedChildVoice() => "tr-TR-FilizNeural"; // Using Filiz with modified pitch
+        
+        /// <summary>
         /// Gets the appropriate Turkish voice based on the content
         /// </summary>
         /// <param name="content">The content to analyze</param>
