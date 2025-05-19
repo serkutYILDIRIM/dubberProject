@@ -1,838 +1,1564 @@
-using System;
+﻿using System;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Controls.Primitives;
-using System.Threading;
+using System.Windows.Media.Imaging;
+using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using YouTubeDubber.Core;
-using YouTubeDubber.Core.Models;
+using YouTubeDubber.Core.Extensions;
+using YouTubeDubber.Core.Helpers;
 using YouTubeDubber.Core.Interfaces;
+using YouTubeDubber.Core.Models;
 using YouTubeDubber.Core.Services;
 
-namespace YouTubeDubber.UI
-{
-    public partial class MainWindow : Window
+namespace YouTubeDubber.UI;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : Window
+{    
+    private readonly IYouTubeService _youTubeService;
+    private readonly ISpeechRecognitionService _speechRecognitionService;
+    private readonly ITranslationService _translationService;
+    private readonly ITextToSpeechService _textToSpeechService;
+    private readonly IAudioVideoMergeService _audioVideoMergeService;
+    private VideoInfo? _currentVideoInfo;
+    private TranscriptionResult? _currentTranscription;
+    private TranslationResult? _currentTranslation;
+    private string? _lastSynthesizedAudioPath;
+    private string? _lastDubbedVideoPath;
+    private string _downloadsFolderPath;
+    private string? _lastExtractedAudioPath;
+    
+    public MainWindow()
     {
-    // Services
-    private IYouTubeService? _youTubeService;
-    private ISpeechRecognitionService? _speechRecognitionService;
-    private ITextToSpeechService? _textToSpeechService;
-    private ITranslationService? _translationService;
-    private IAudioVideoMergeService? _audioVideoMergeService;
-
-    // State management
-    private VideoInfo? _currentVideo;
-    private TranscriptionResult? _transcriptionResult;
-    private TranslationResult? _translationResult;
-    private string? _downloadedVideoPath;
-    private string? _downloadedAudioPath;
-    private string? _extractedSpeechPath;
-    private string? _generatedSpeechPath;
-    private string? _dubbedVideoPath;
-
-        public MainWindow()
+        InitializeComponent();
+        
+        // Create downloads folder in Documents directory
+        _downloadsFolderPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            "YouTubeDubber", 
+            "Downloads");
+          Directory.CreateDirectory(_downloadsFolderPath);
+        
+        // Initialize YouTube service
+        _youTubeService = new YouTubeService(_downloadsFolderPath);
+          
+        // Initialize speech recognition service
+        // Note: In a production app, you would load these from secure configuration
+        var speechOptions = new SpeechRecognitionOptions
         {
-            InitializeComponent();
-            InitializeServices();
-            InitializeVoiceSettings();
+            ApiKey = Environment.GetEnvironmentVariable("AZURE_SPEECH_KEY") ?? "",
+            Region = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION") ?? "westus",
+            LanguageCode = "en-US",
+            UseContinuousRecognition = true,
+            EnableWordLevelTimestamps = true
+        };
+        
+        _speechRecognitionService = new AzureSpeechRecognitionService(speechOptions);        // Initialize translation service
+        var translationOptions = new TranslationOptions
+        {
+            ApiKey = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_KEY") ?? "",
+            Region = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_REGION") ?? "global",
+            SourceLanguage = "en",
+            TargetLanguage = "tr"
+        };
+        
+        // Create translation service using factory method
+        _translationService = CreateTranslationService(translationOptions);
+        
+        // Initialize text-to-speech service
+        var ttsOptions = new TextToSpeechOptions
+        {
+            ApiKey = Environment.GetEnvironmentVariable("AZURE_SPEECH_KEY") ?? "",
+            Region = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION") ?? "westus",
+            LanguageCode = "tr-TR",
+            OutputFormat = "wav",
+            SamplingRate = 24000
+        };
+        
+        _textToSpeechService = new AzureTextToSpeechService(ttsOptions);
+          // Initialize audio-video merge service
+        _audioVideoMergeService = new FFmpegAudioVideoMergeService();
+        
+        // Initialize FFmpeg in the background
+        InitializeFFmpegAsync();
+    }
+    
+    /// <summary>
+    /// Creates a translation service with the specified options
+    /// </summary>
+    private ITranslationService CreateTranslationService(TranslationOptions options)
+    {
+        // Create an instance of AzureTranslationService without directly referencing the type
+        // Use reflection to create the instance
+        var type = Type.GetType("YouTubeDubber.Core.Services.AzureTranslationService, YouTubeDubber.Core");
+        if (type == null)
+        {
+            throw new InvalidOperationException("AzureTranslationService type not found");
         }
-
-        private void InitializeServices()
-        {
-            try
-            {
-                _youTubeService = new YouTubeService();
-                _speechRecognitionService = new AzureSpeechRecognitionService();
-                _textToSpeechService = new AzureTextToSpeechService();
-                _translationService = new AzureTranslationService();
-                _audioVideoMergeService = new FFmpegAudioVideoMergeService();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Servisler başlatılırken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }    private void InitializeVoiceSettings()
+        
+        // Create an instance using the constructor that takes TranslationOptions
+        return (ITranslationService)Activator.CreateInstance(type, options);
+    }
+    
+    /// <summary>
+    /// Initialize FFmpeg in the background
+    /// </summary>
+    private async void InitializeFFmpegAsync()
     {
         try
         {
-            // Note: We don't need to initialize these here as they will be populated 
-            // when needed from the UI events. The controls are defined in XAML.
+            // Cast to specific implementation to access the initialization method
+            if (_audioVideoMergeService is FFmpegAudioVideoMergeService ffmpegService)
+            {
+                await ffmpegService.InitializeFFmpegAsync();
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error in InitializeVoiceSettings: {ex.Message}");
+            // Log the error but don't show to user yet - this is a background initialization
+            Console.WriteLine($"FFmpeg initialization error: {ex.Message}");
         }
     }
-
-    #region UI Helper Methods
-    private void ShowProgressUI(string activity, ProgressPanel panel)
+    
+    /// <summary>
+    /// Handle the button click event to get video information
+    /// </summary>
+    private async void BtnGetVideoInfo_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            // Common progress UI update
-            var downloadProgressPanel = this.FindName("downloadProgressPanel") as UIElement;
-            if (downloadProgressPanel != null)
-                downloadProgressPanel.Visibility = Visibility.Visible;
-                
-            // Panel-specific UI updates
-            switch (panel)
-            {
-                case ProgressPanel.Download:
-                    var txtDownloadStatus = this.FindName("txtDownloadStatus") as TextBlock;
-                    if (txtDownloadStatus != null)
-                    {
-                        txtDownloadStatus.Text = activity;
-                    }
-                    var progressDownload = this.FindName("progressDownload") as ProgressBar;
-                    if (progressDownload != null)
-                    {
-                        progressDownload.IsIndeterminate = true;
-                        progressDownload.Value = 0;
-                    }
-                    break;
-                    
-                // Other cases would be handled if the UI controls existed
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in ShowProgressUI: {ex.Message}");
-        }
-    }    private void UpdateProgressUI(double progress, ProgressPanel panel)
+        await ProcessYouTubeUrl();
+    }
+    
+    /// <summary>
+    /// Handle enter key in the URL textbox
+    /// </summary>
+    private async void TxtYouTubeUrl_KeyDown(object sender, KeyEventArgs e)
     {
-        try
+        if (e.Key == Key.Enter)
         {
-            switch (panel)
-            {
-                case ProgressPanel.Download:
-                    var progressDownload = this.FindName("progressDownload") as ProgressBar;
-                    if (progressDownload != null)
-                    {
-                        progressDownload.IsIndeterminate = false;
-                        progressDownload.Value = progress * 100;
-                    }
-                    break;
-                    
-                // Other cases would be handled if the UI controls existed
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in UpdateProgressUI: {ex.Message}");
-        }
-    }        private void HideProgressUI(ProgressPanel panel)
-        {
-            try
-            {
-                // Common progress UI update
-                var downloadProgressPanel = this.FindName("downloadProgressPanel") as UIElement;
-                if (downloadProgressPanel != null)
-                    downloadProgressPanel.Visibility = Visibility.Collapsed;
-                
-                // Panel-specific cleanup
-                switch (panel)
-                {
-                    case ProgressPanel.Download:
-                        // Just collapse the common progress grid, which we've already done
-                        break;
-                        
-                    // Other cases would be handled if the UI controls existed
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in HideProgressUI: {ex.Message}");
-            }
-        }    private void DisplayTranscriptionResult(TranscriptionResult transcription)
-    {
-        try
-        {
-            // Save result
-            _transcriptionResult = transcription;
-            
-            // Display success message since we can't update UI directly
-            MessageBox.Show("Konuşmalar başarıyla tanımlandı.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-            
-            // Make the translation button available (if it exists in the XAML)
-            var btnTranslateText = this.FindName("btnTranslateText") as Button;
-            if (btnTranslateText != null)
-                btnTranslateText.Visibility = Visibility.Visible;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in DisplayTranscriptionResult: {ex.Message}");
-        }
-    }    
-
-    private void DisplayTranslationResult(TranslationResult translation)
-    {
-        try
-        {
-            // Save result
-            _translationResult = translation;
-            
-            // Display success message since we can't update UI directly
-            MessageBox.Show("Çeviri başarıyla tamamlandı.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-            
-            // Update UI to enable next steps
-            var btnGenerateSpeech = this.FindName("btnGenerateSpeech") as Button;
-            if (btnGenerateSpeech != null)
-                btnGenerateSpeech.Visibility = Visibility.Visible;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in DisplayTranslationResult: {ex.Message}");
+            await ProcessYouTubeUrl();
         }
     }
-        #endregion
-
-        #region Event Handlers
-        private void BtnExit_Click(object sender, RoutedEventArgs e)
+    
+    /// <summary>    /// Process the YouTube URL entered by the user
+    /// </summary>
+    private async Task ProcessYouTubeUrl()
+    {
+        string? url = txtYouTubeUrl.Text?.Trim();
+        
+        if (string.IsNullOrEmpty(url))
         {
-            Application.Current.Shutdown();
+            MessageBox.Show("Please enter a YouTube URL", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
         }
-
-        private void BtnConfigureSpeechCredentials_Click(object sender, RoutedEventArgs e)
+        
+        // Validate the URL
+        if (!_youTubeService.IsValidYouTubeUrl(url))
         {
-            // Open speech credentials configuration dialog
-            MessageBox.Show("Speech credentials configuration dialog will open here.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Please enter a valid YouTube URL", "Invalid URL", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
         }
-
-        private void BtnConfigureTranslationCredentials_Click(object sender, RoutedEventArgs e)
+        
+        try
         {
-            // Open translation credentials configuration dialog
-            MessageBox.Show("Translation credentials configuration dialog will open here.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Show loading state
+            SetLoadingState(true);
+            
+            // Get video information
+            _currentVideoInfo = await _youTubeService.GetVideoInfoAsync(url);
+            
+            // Display video information
+            DisplayVideoInfo(_currentVideoInfo);
         }
-
-        private void BtnResetCredentials_Click(object sender, RoutedEventArgs e)
+        catch (Exception ex)
         {
-            // Reset credentials
-            MessageBox.Show("Credentials have been reset.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"Error retrieving video information: {ex.Message}", 
+                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-
-        private void BtnAbout_Click(object sender, RoutedEventArgs e)
+        finally
         {
-            // Show about dialog
-            MessageBox.Show("YouTube Video Dublaj Uygulaması\nSürüm 1.0\n\n© 2025", "Hakkında", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Hide loading state
+            SetLoadingState(false);
         }
-
-        private void TxtYouTubeUrl_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                BtnGetVideoInfo_Click(sender, e);
-            }
-        }        private async void BtnGetVideoInfo_Click(object sender, RoutedEventArgs e)
+    }
+    
+    /// <summary>
+    /// Display the video information in the UI
+    /// </summary>
+    private void DisplayVideoInfo(VideoInfo videoInfo)
+    {
+        if (videoInfo == null) return;
+        
+        // Set video details
+        txtVideoTitle.Text = videoInfo.Title;
+        txtVideoAuthor.Text = videoInfo.Author;
+        txtVideoDuration.Text = FormatDuration(videoInfo.Duration);
+        txtVideoDescription.Text = videoInfo.Description;
+        
+        // Load thumbnail if available
+        if (!string.IsNullOrEmpty(videoInfo.ThumbnailUrl))
         {
             try
             {
-                var txtYouTubeUrl = this.FindName("txtYouTubeUrl") as TextBox;
-                if (txtYouTubeUrl != null && !string.IsNullOrWhiteSpace(txtYouTubeUrl.Text))
-                {
-                    string url = txtYouTubeUrl.Text.Trim();
-                    
-                    ShowProgressUI("Video bilgileri alınıyor...", ProgressPanel.Download);
-                    
-                    // Get video info
-                    _currentVideo = await _youTubeService.GetVideoInfoAsync(url);
-                    
-                    // Update UI with video info
-                    var txtVideoTitle = this.FindName("txtVideoTitle") as TextBlock;
-                    if (txtVideoTitle != null)
-                        txtVideoTitle.Text = _currentVideo.Title;
-                    
-                    var txtVideoAuthor = this.FindName("txtVideoAuthor") as TextBlock;
-                    if (txtVideoAuthor != null)
-                        txtVideoAuthor.Text = _currentVideo.Author;
-                    
-                    var txtVideoDuration = this.FindName("txtVideoDuration") as TextBlock;
-                    if (txtVideoDuration != null)
-                        txtVideoDuration.Text = _currentVideo.Duration.ToString(@"hh\:mm\:ss");
-                    
-                    var txtVideoDescription = this.FindName("txtVideoDescription") as TextBlock;
-                    if (txtVideoDescription != null)
-                        txtVideoDescription.Text = _currentVideo.Description;
-                    
-                    // Load thumbnail
-                    var imgThumbnail = this.FindName("imgThumbnail") as System.Windows.Controls.Image;
-                    if (imgThumbnail != null && !string.IsNullOrEmpty(_currentVideo.ThumbnailUrl))
-                    {
-                        try
-                        {
-                            imgThumbnail.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(_currentVideo.ThumbnailUrl));
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error loading thumbnail: {ex.Message}");
-                        }
-                    }
-                    
-                    // Show video info panel
-                    var videoInfoPanel = this.FindName("videoInfoPanel") as UIElement;
-                    if (videoInfoPanel != null)
-                        videoInfoPanel.Visibility = Visibility.Visible;
-                    
-                    var txtNoData = this.FindName("txtNoData") as TextBlock;
-                    if (txtNoData != null)
-                        txtNoData.Visibility = Visibility.Collapsed;
-                    
-                    HideProgressUI(ProgressPanel.Download);
-                }
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(videoInfo.ThumbnailUrl);
+                bitmap.EndInit();
+                imgThumbnail.Source = bitmap;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                HideProgressUI(ProgressPanel.Download);
-                MessageBox.Show($"Video bilgileri alınırken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }        private async void BtnDownloadVideo_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_currentVideo == null)
-                {
-                    MessageBox.Show("Önce bir YouTube video URL'si girmelisiniz.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                ShowProgressUI("Video indiriliyor...", ProgressPanel.Download);
-                
-                // Progress reporter
-                var progress = new Progress<double>(p => UpdateProgressUI(p, ProgressPanel.Download));
-                
-                var txtYouTubeUrl = this.FindName("txtYouTubeUrl") as TextBox;
-                // Download video
-                _downloadedVideoPath = await _youTubeService.DownloadVideoAsync(
-                    txtYouTubeUrl?.Text,
-                    null,
-                    "highest",
-                    progress
-                );
-                
-                HideProgressUI(ProgressPanel.Download);
-                  // Show preview
-                if (!string.IsNullOrEmpty(_downloadedVideoPath))
-                {
-                    var mediaPreview = this.FindName("mediaPreview") as MediaElement;
-                    if (mediaPreview != null)
-                    {
-                        mediaPreview.Source = new Uri(_downloadedVideoPath);
-                    }
-                    
-                    var videoPreviewBorder = this.FindName("videoPreviewBorder") as UIElement;
-                    if (videoPreviewBorder != null)
-                    {
-                        videoPreviewBorder.Visibility = Visibility.Visible;
-                    }
-                    
-                    var videoPreviewControls = this.FindName("videoPreviewControls") as UIElement;
-                    if (videoPreviewControls != null)
-                    {
-                        videoPreviewControls.Visibility = Visibility.Visible;
-                    }
-                    
-                    MessageBox.Show($"Video başarıyla indirildi: {_downloadedVideoPath}", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                HideProgressUI(ProgressPanel.Download);
-                MessageBox.Show($"Video indirilirken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }        private async void BtnDownloadAudio_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_currentVideo == null)
-                {
-                    MessageBox.Show("Önce bir YouTube video URL'si girmelisiniz.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                ShowProgressUI("Ses dosyası indiriliyor...", ProgressPanel.Download);
-                
-                // Progress reporter
-                var progress = new Progress<double>(p => UpdateProgressUI(p, ProgressPanel.Download));
-                  // Download audio
-                var txtYouTubeUrl = this.FindName("txtYouTubeUrl") as TextBox;
-                _downloadedAudioPath = await _youTubeService.DownloadAudioOnlyAsync(
-                    txtYouTubeUrl?.Text,
-                    null,
-                    progress
-                );
-                
-                HideProgressUI(ProgressPanel.Download);
-                
-                if (!string.IsNullOrEmpty(_downloadedAudioPath))
-                {
-                    MessageBox.Show($"Ses dosyası başarıyla indirildi: {_downloadedAudioPath}", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                HideProgressUI(ProgressPanel.Download);
-                MessageBox.Show($"Ses dosyası indirilirken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                // If thumbnail loading fails, don't show any image
+                imgThumbnail.Source = null;
             }
         }
-
-        private async void BtnExtractSpeechAudio_Click(object sender, RoutedEventArgs e)
+        
+        // Show the video info panel
+        videoInfoPanel.Visibility = Visibility.Visible;
+        txtNoData.Visibility = Visibility.Collapsed;
+    }
+    
+    /// <summary>
+    /// Format the duration of the video as a readable string
+    /// </summary>
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.Hours > 0)
         {
-            try
-            {
-                if (_currentVideo == null)
-                {
-                    MessageBox.Show("Önce bir YouTube video URL'si girmelisiniz.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                if (string.IsNullOrEmpty(_downloadedVideoPath) && string.IsNullOrEmpty(_downloadedAudioPath))
-                {
-                    MessageBox.Show("Önce video veya ses dosyasını indirmelisiniz.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                ShowProgressUI("Konuşma sesleri çıkartılıyor...", ProgressPanel.Download);
-                
-                // Extract speech audio
-                string sourceFile = !string.IsNullOrEmpty(_downloadedAudioPath) ? _downloadedAudioPath : _downloadedVideoPath;
-                
-                // Call audio extraction service
-                //_extractedSpeechPath = await _audioExtractionService.ExtractSpeechAsync(sourceFile, new AudioExtractionOptions
-                //{
-                //    EnhanceSpeech = true
-                //});
-                
-                // For now, just mock the result
-                _extractedSpeechPath = sourceFile;
-                
-                HideProgressUI(ProgressPanel.Download);
-                
-                if (!string.IsNullOrEmpty(_extractedSpeechPath))
-                {
-                    MessageBox.Show("Konuşma sesleri başarıyla çıkartıldı.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                HideProgressUI(ProgressPanel.Download);
-                MessageBox.Show($"Konuşma sesleri çıkartılırken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }        private async void BtnTranscribeAudio_Click(object sender, RoutedEventArgs e)
+            return $"{duration.Hours}:{duration.Minutes:D2}:{duration.Seconds:D2}";
+        }
+        
+        return $"{duration.Minutes}:{duration.Seconds:D2}";
+    }
+    
+    /// <summary>
+    /// Set the UI state for loading operations
+    /// </summary>
+    private void SetLoadingState(bool isLoading)
+    {
+        // Disable controls during loading
+        txtYouTubeUrl.IsEnabled = !isLoading;
+        btnGetVideoInfo.IsEnabled = !isLoading;
+        
+        // If download buttons are visible, disable them too
+        if (videoInfoPanel.Visibility == Visibility.Visible)
         {
-            try
-            {
-                if (string.IsNullOrEmpty(_downloadedAudioPath) && string.IsNullOrEmpty(_extractedSpeechPath))
-                {
-                    MessageBox.Show("Önce ses dosyasını indirmelisiniz veya konuşma seslerini çıkartmalısınız.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                ShowProgressUI("Konuşmalar tanımlanıyor...", ProgressPanel.Download); // Using Download as a fallback
-                
-                // Transcribe audio
-                string sourceFile = !string.IsNullOrEmpty(_extractedSpeechPath) ? _extractedSpeechPath : _downloadedAudioPath;                var options = new SpeechRecognitionOptions
-                {
-                    // Note: SpeechRecognitionOptions doesn't have a Language property in this interface
-                    // Use correct properties from the interface
-                };
-                
-                var transcriptionResult = await _speechRecognitionService.TranscribeAudioFileAsync(sourceFile, options);
-                
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                
-                if (transcriptionResult != null)
-                {
-                    DisplayTranscriptionResult(transcriptionResult);
-                }
-            }
-            catch (Exception ex)
-            {
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                MessageBox.Show($"Konuşma tanıma işlemi sırasında hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }        private async void BtnTranslateText_Click(object sender, RoutedEventArgs e)
+            btnDownloadVideo.IsEnabled = !isLoading;
+            btnDownloadAudio.IsEnabled = !isLoading;
+        }
+        
+        // Set cursor state
+        Cursor = isLoading ? Cursors.Wait : null;
+    }
+    
+    /// <summary>
+    /// Handle the download video button click
+    /// </summary>
+    private async void BtnDownloadVideo_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentVideoInfo == null) return;
+          try
         {
-            try
+            string? url = txtYouTubeUrl.Text?.Trim();
+            
+            if (string.IsNullOrEmpty(url) || _currentVideoInfo == null)
             {
-                if (_transcriptionResult == null || string.IsNullOrEmpty(_transcriptionResult.FullText))
-                {
-                    MessageBox.Show("Önce konuşmaları tanımlamanız gerekiyor.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                ShowProgressUI("Çeviri yapılıyor...", ProgressPanel.Download); // Using Download as a fallback
-                
-                // Translate text
-                var options = new TranslationOptions
-                {
-                    SourceLanguage = "en",
-                    TargetLanguage = "tr"
-                };
-                
-                var translationResult = await _translationService.TranslateTextAsync(_transcriptionResult.FullText, options);
-                
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                
-                if (translationResult != null)
-                {
-                    DisplayTranslationResult(translationResult);
-                }
+                MessageBox.Show("No valid video URL or video info available", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            catch (Exception ex)
+            
+            // Ask user for the save location
+            SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                MessageBox.Show($"Çeviri işlemi sırasında hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }        private async void BtnEnhanceTranslation_Click(object sender, RoutedEventArgs e)
-        {
-            try
+                FileName = $"{_currentVideoInfo.Title}.mp4",
+                DefaultExt = ".mp4",
+                Filter = "MP4 Files (*.mp4)|*.mp4",
+                InitialDirectory = _downloadsFolderPath
+            };
+            
+            bool? result = saveFileDialog.ShowDialog(this);
+            
+            if (result.HasValue && result.Value)
             {
-                if (_translationResult == null || string.IsNullOrEmpty(_translationResult.TranslatedText))
-                {
-                    MessageBox.Show("Önce çeviri yapmanız gerekiyor.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                ShowProgressUI("Çeviri iyileştiriliyor...", ProgressPanel.Download); // Using Download as a fallback
-                
-                // Enhance translation - this would typically call an AI service to improve the translation
-                // For now, just simulate the enhancement
-                await Task.Delay(2000);
-                
-                string enhancedText = _translationResult.TranslatedText;
-                _translationResult.TranslatedText = enhancedText;
-                
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                
-                DisplayTranslationResult(_translationResult);
-                MessageBox.Show("Çeviri iyileştirildi.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                MessageBox.Show($"Çeviri iyileştirme işlemi sırasında hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }        private async void BtnGenerateSpeech_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_translationResult == null || string.IsNullOrEmpty(_translationResult.TranslatedText))
-                {
-                    MessageBox.Show("Önce çeviri yapmanız gerekiyor.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                // Create and show Turkish speech options dialog
-                var speechOptionsDialog = new TurkishSpeechOptionsDialog(_textToSpeechService, _translationResult.TranslatedText);
-                speechOptionsDialog.Owner = this;
-                
-                bool? dialogResult = speechOptionsDialog.ShowDialog();
-                
-                if (dialogResult != true)
-                {
-                    // User cancelled
-                    return;
-                }
-                
-                // Get options from dialog
-                var options = speechOptionsDialog.SpeechOptions;
-                
-                ShowProgressUI("Türkçe konuşma oluşturuluyor...", ProgressPanel.Download); // Using Download as a fallback
-                
-                // Generate a temporary file path for the speech output
-                string outputFilePath = Path.Combine(Path.GetTempPath(), $"speech_{Guid.NewGuid()}.mp3");
-                
-                // Call the speech service to generate audio
-                _generatedSpeechPath = await _textToSpeechService.SynthesizeTextToSpeechAsync(
-                    _translationResult.TranslatedText,
-                    outputFilePath,
-                    options
-                );
-                
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                  if (!string.IsNullOrEmpty(_generatedSpeechPath))
-                {
-                    // Update UI to show success
-                    var btnCreateDubbedVideo = this.FindName("btnCreateDubbedVideo") as Button;
-                    if (btnCreateDubbedVideo != null)
-                        btnCreateDubbedVideo.Visibility = Visibility.Visible;
-                    
-                    MessageBox.Show("Türkçe konuşma başarıyla oluşturuldu.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                MessageBox.Show($"Konuşma sentezi sırasında hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }private async void BtnCreateDubbedVideo_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(_downloadedVideoPath))
-                {
-                    MessageBox.Show("Önce video dosyasını indirmelisiniz.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                if (string.IsNullOrEmpty(_generatedSpeechPath))
-                {
-                    MessageBox.Show("Önce Türkçe konuşma oluşturmalısınız.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                // Create and show Turkish dubbing options dialog
-                var dubbingOptionsDialog = new TurkishDubbingOptionsDialog();
-                dubbingOptionsDialog.Owner = this;
-                
-                bool? dialogResult = dubbingOptionsDialog.ShowDialog();
-                
-                if (dialogResult != true)
-                {
-                    // User cancelled
-                    return;
-                }
-                  // Get options from dialog
-                var options = dubbingOptionsDialog.DubbingOptions;
-                
-                ShowProgressUI("Dublajlı video oluşturuluyor...", ProgressPanel.Download); // Using Download as a fallback
-                
-                // Generate output path for the dubbed video
-                string outputFilePath = Path.Combine(
-                    Path.GetDirectoryName(_downloadedVideoPath) ?? Path.GetTempPath(),
-                    $"{Path.GetFileNameWithoutExtension(_downloadedVideoPath)}_dubbed.mp4"
-                );
-                  // Create a progress reporter for the UI
-                var progress = new Progress<double>(p => UpdateProgressUI(p, ProgressPanel.Download)); // Using Download as a fallback
-                
-                // Call the service to create the dubbed video
-                _dubbedVideoPath = await _audioVideoMergeService.CreateTurkishDubbedVideoAsync(
-                    _downloadedVideoPath,
-                    _generatedSpeechPath,
-                    outputFilePath,
-                    options,
-                    progress
-                );
-                
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                
-                if (!string.IsNullOrEmpty(_dubbedVideoPath))
-                {
-                    MessageBox.Show($"Dublajlı video başarıyla oluşturuldu: {_dubbedVideoPath}", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-                    
-                    // You would use a media player control to preview the video here
-                    // Since we don't have the complete UI controls yet, we'll just inform the user
-                    MessageBox.Show("Video oynatıcı kullanarak oluşturulan videoyu izleyebilirsiniz.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                HideProgressUI(ProgressPanel.Download); // Using Download as a fallback
-                MessageBox.Show($"Dublajlı video oluşturulurken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Start download
+                await DownloadVideo(url, saveFileDialog.FileName);
             }
         }
-
-        private void BtnSaveTranscription_Click(object sender, RoutedEventArgs e)
+        catch (Exception ex)
         {
-            try
+            MessageBox.Show($"Error downloading video: {ex.Message}", 
+                "Download Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+    
+    /// <summary>
+    /// Handle the download audio button click
+    /// </summary>
+    private async void BtnDownloadAudio_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentVideoInfo == null) return;
+          try
+        {
+            string? url = txtYouTubeUrl.Text?.Trim();
+            
+            if (string.IsNullOrEmpty(url) || _currentVideoInfo == null)
             {
-                if (_transcriptionResult == null || string.IsNullOrEmpty(_transcriptionResult.FullText))
-                {
-                    MessageBox.Show("Kaydedilecek çeviriyazı bulunamadı.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                MessageBox.Show("No valid video URL or video info available", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            
+            // Ask user for the save location
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                FileName = $"{_currentVideoInfo.Title}.mp3",
+                DefaultExt = ".mp3",
+                Filter = "MP3 Files (*.mp3)|*.mp3",
+                InitialDirectory = _downloadsFolderPath
+            };
+            
+            bool? result = saveFileDialog.ShowDialog(this);
+            
+            if (result.HasValue && result.Value)
+            {
+                // Start download
+                await DownloadAudio(url, saveFileDialog.FileName);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error downloading audio: {ex.Message}", 
+                "Download Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+    
+    /// <summary>
+    /// Handle the extract speech-optimized audio button click
+    /// </summary>
+    private async void BtnExtractSpeechAudio_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentVideoInfo == null) return;
+        
+        try
+        {
+            string? url = txtYouTubeUrl.Text?.Trim();
+            
+            if (string.IsNullOrEmpty(url) || _currentVideoInfo == null)
+            {
+                MessageBox.Show("No valid video URL or video info available", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            
+            // Ask user for the save location
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                FileName = $"{_currentVideoInfo.Title}_speech.wav",
+                DefaultExt = ".wav",
+                Filter = "WAV Files (*.wav)|*.wav|All Audio Files|*.wav;*.mp3;*.flac;*.ogg",
+                InitialDirectory = _downloadsFolderPath
+            };
+            
+            bool? result = saveFileDialog.ShowDialog(this);
+            
+            if (result.HasValue && result.Value)
+            {
+                // Start download and extraction
+                await ExtractSpeechAudio(url, saveFileDialog.FileName);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error extracting speech audio: {ex.Message}", 
+                "Extraction Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+    
+    /// <summary>
+    /// Download the video and show progress
+    /// </summary>
+    private async Task DownloadVideo(string url, string outputPath)
+    {
+        try
+        {
+            // Show progress UI
+            downloadProgressGrid.Visibility = Visibility.Visible;
+            txtDownloadStatus.Text = "Downloading video...";
+            SetLoadingState(true);
+            
+            // Create a progress reporter
+            var progress = new Progress<double>(p =>
+            {
+                // Update progress bar
+                progressDownload.Value = p * 100;
+            });
+            
+            // Start the download
+            string downloadedFilePath = await _youTubeService.DownloadVideoAsync(
+                url, 
+                outputPath, 
+                quality: "highest", 
+                progressCallback: progress);
+            
+            // Download complete
+            progressDownload.Value = 100;
+            
+            MessageBox.Show($"Video downloaded successfully to:\n{downloadedFilePath}", 
+                "Download Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            
+            // Open the folder containing the downloaded file
+            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{downloadedFilePath}\"");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error downloading video: {ex.Message}", 
+                "Download Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            // Hide progress UI
+            downloadProgressGrid.Visibility = Visibility.Collapsed;
+            SetLoadingState(false);
+        }
+    }
+    
+    /// <summary>
+    /// Download the audio and show progress
+    /// </summary>
+    private async Task DownloadAudio(string url, string outputPath)
+    {
+        try
+        {
+            // Show progress UI
+            downloadProgressGrid.Visibility = Visibility.Visible;
+            txtDownloadStatus.Text = "Downloading audio...";
+            SetLoadingState(true);
+            
+            // Create a progress reporter
+            var progress = new Progress<double>(p =>
+            {
+                // Update progress bar
+                progressDownload.Value = p * 100;
+            });
+            
+            // Start the download
+            string downloadedFilePath = await _youTubeService.DownloadAudioOnlyAsync(
+                url, 
+                outputPath, 
+                progressCallback: progress);
+            
+            // Download complete
+            progressDownload.Value = 100;
+            
+            MessageBox.Show($"Audio downloaded successfully to:\n{downloadedFilePath}", 
+                "Download Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            
+            // Open the folder containing the downloaded file
+            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{downloadedFilePath}\"");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error downloading audio: {ex.Message}", 
+                "Download Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            // Hide progress UI
+            downloadProgressGrid.Visibility = Visibility.Collapsed;
+            SetLoadingState(false);
+        }
+    }
+    
+    /// <summary>
+    /// Extract speech-optimized audio from a YouTube video and show progress
+    /// </summary>
+    private async Task ExtractSpeechAudio(string url, string outputPath)
+    {
+        try
+        {
+            // Show progress UI
+            downloadProgressGrid.Visibility = Visibility.Visible;
+            txtDownloadStatus.Text = "Downloading and processing audio for speech recognition...";
+            SetLoadingState(true);
+            
+            // Create a progress reporter
+            var progress = new Progress<double>(p =>
+            {
+                // Update progress bar
+                progressDownload.Value = p * 100;
+            });
+            
+            // Start the download and audio extraction
+            string extractedFilePath = await _youTubeService.DownloadAndExtractSpeechAudioAsync(
+                url, 
+                outputPath,
+                deleteVideoAfterExtraction: true,
+                progressCallback: progress);
+            
+            // Store the path to the extracted audio file
+            _lastExtractedAudioPath = extractedFilePath;
+            
+            // Download and extraction complete
+            progressDownload.Value = 100;
+            
+            MessageBox.Show($"Speech-optimized audio extracted successfully to:\n{extractedFilePath}", 
+                "Extraction Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            
+            // Open the folder containing the extracted file
+            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{extractedFilePath}\"");
+            
+            // Ask if the user wants to transcribe the audio now
+            var result = MessageBox.Show(
+                "Would you like to transcribe this audio to text now?",
+                "Transcribe Audio",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
                 
-                SaveFileDialog saveFileDialog = new SaveFileDialog
-                {
-                    Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
-                    Title = "Çeviriyazıyı Kaydet",
-                    FileName = $"{_currentVideo?.Title ?? "transcription"}_en.txt"
-                };
-                
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    File.WriteAllText(saveFileDialog.FileName, _transcriptionResult.FullText);
-                    MessageBox.Show($"Çeviriyazı başarıyla kaydedildi: {saveFileDialog.FileName}", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
+            if (result == MessageBoxResult.Yes)
             {
-                MessageBox.Show($"Çeviriyazı kaydedilirken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                await TranscribeAudio(_lastExtractedAudioPath);
             }
         }
-
-        private void BtnSaveTranslation_Click(object sender, RoutedEventArgs e)
+        catch (Exception ex)
         {
-            try
-            {
-                if (_translationResult == null || string.IsNullOrEmpty(_translationResult.TranslatedText))
-                {
-                    MessageBox.Show("Kaydedilecek çeviri bulunamadı.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                SaveFileDialog saveFileDialog = new SaveFileDialog
-                {
-                    Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
-                    Title = "Çeviriyi Kaydet",
-                    FileName = $"{_currentVideo?.Title ?? "translation"}_tr.txt"
-                };
-                
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    File.WriteAllText(saveFileDialog.FileName, _translationResult.TranslatedText);
-                    MessageBox.Show($"Çeviri başarıyla kaydedildi: {saveFileDialog.FileName}", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Çeviri kaydedilirken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }        private void BtnPlayPreview_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var mediaPreview = this.FindName("mediaPreview") as MediaElement;
-                if (mediaPreview != null)
-                {
-                    mediaPreview.Play();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in BtnPlayPreview_Click: {ex.Message}");
-            }
+            MessageBox.Show($"Error extracting speech audio: {ex.Message}", 
+                "Extraction Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-
-        private void BtnPausePreview_Click(object sender, RoutedEventArgs e)
+        finally
         {
-            try
-            {
-                var mediaPreview = this.FindName("mediaPreview") as MediaElement;
-                if (mediaPreview != null)
-                {
-                    mediaPreview.Pause();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in BtnPausePreview_Click: {ex.Message}");
-            }
+            // Hide progress UI
+            downloadProgressGrid.Visibility = Visibility.Collapsed;
+            SetLoadingState(false);
         }
-
-        private void BtnStopPreview_Click(object sender, RoutedEventArgs e)
+    }
+    
+    /// <summary>
+    /// Handle the transcribe audio button click
+    /// </summary>
+    private async void BtnTranscribeAudio_Click(object sender, RoutedEventArgs e)
+    {
+        try
         {
-            try
+            if (string.IsNullOrEmpty(_lastExtractedAudioPath) || !File.Exists(_lastExtractedAudioPath))
             {
-                var mediaPreview = this.FindName("mediaPreview") as MediaElement;
-                if (mediaPreview != null)
-                {
-                    mediaPreview.Stop();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in BtnStopPreview_Click: {ex.Message}");
-            }
-        }private void BtnPlayPreviewFull_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Since we can't directly use mediaPreviewFull, we'll log a message
-                Console.WriteLine("Play preview requested");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in BtnPlayPreviewFull_Click: {ex.Message}");
-            }
-        }
-
-        private void BtnPausePreviewFull_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Since we can't directly use mediaPreviewFull, we'll log a message
-                Console.WriteLine("Pause preview requested");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in BtnPausePreviewFull_Click: {ex.Message}");
-            }
-        }
-
-        private void BtnStopPreviewFull_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Since we can't directly use mediaPreviewFull, we'll log a message
-                Console.WriteLine("Stop preview requested");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in BtnStopPreviewFull_Click: {ex.Message}");
-            }
-        }        private void CmbMixingProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            try
-            {
-                // Instead of directly accessing UI elements, we'll just log the change
-                Console.WriteLine("Mixing profile selection changed");
-                // This will be handled via the dialog approach we've implemented
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in CmbMixingProfile_SelectionChanged: {ex.Message}");
-            }
-        }
-
-        private void ChkAddSubtitles_CheckedChanged(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Instead of directly accessing UI elements, we'll just log the change
-                Console.WriteLine("Add subtitles checkbox changed");
-                // This will be handled via the dialog approach we've implemented
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in ChkAddSubtitles_CheckedChanged: {ex.Message}");
-            }
-        }
-
-        private void BtnBrowseSubtitles_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Instead of directly modifying UI, we'll open the file dialog and log the result
+                // If no audio has been extracted, prompt the user to select an audio file
                 OpenFileDialog openFileDialog = new OpenFileDialog
                 {
-                    Filter = "Subtitle files (*.srt;*.ass;*.ssa)|*.srt;*.ass;*.ssa|All files (*.*)|*.*",
-                    Title = "Altyazı Dosyası Seç"
+                    Filter = "Audio Files (*.wav;*.mp3)|*.wav;*.mp3|All Files (*.*)|*.*",
+                    Title = "Select Audio File to Transcribe",
+                    InitialDirectory = _downloadsFolderPath
                 };
                 
-                if (openFileDialog.ShowDialog() == true)
+                if (openFileDialog.ShowDialog() != true)
                 {
-                    Console.WriteLine($"Selected subtitle file: {openFileDialog.FileName}");
+                    return;
+                }
+                
+                _lastExtractedAudioPath = openFileDialog.FileName;
+            }
+            
+            // Check if we have Azure Speech credentials
+            var apiKey = Environment.GetEnvironmentVariable("AZURE_SPEECH_KEY");
+            var region = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION");
+            
+            if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(region))
+            {
+                // Prompt for API key and region if not set
+                var result = MessageBox.Show(
+                    "Azure Speech Service credentials are required for transcription.\n\n" +
+                    "Would you like to enter your credentials now?",
+                    "Credentials Required",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Show a dialog to get credentials (you would implement this dialog)
+                    if (!await ShowCredentialsDialog())
+                    {
+                        return;
+                    }
+                    
+                    // Update the credentials in the service
+                    apiKey = Environment.GetEnvironmentVariable("AZURE_SPEECH_KEY");
+                    region = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION");
+                    
+                    if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(region))
+                    {
+                        MessageBox.Show(
+                            "Valid credentials are required to continue.",
+                            "Transcription Canceled",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                else
+                {
+                    return;
                 }
             }
-            catch (Exception ex)
+            
+            // Now transcribe the audio
+            await TranscribeAudio(_lastExtractedAudioPath);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error transcribing audio: {ex.Message}",
+                "Transcription Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+    
+    /// <summary>
+    /// Transcribe the audio file and display the result
+    /// </summary>
+    private async Task TranscribeAudio(string audioFilePath)
+    {
+        try
+        {
+            // Show progress UI
+            downloadProgressGrid.Visibility = Visibility.Visible;
+            txtDownloadStatus.Text = "Transcribing audio...";
+            SetLoadingState(true);
+            
+            // Create a progress reporter
+            var progress = new Progress<double>(p =>
             {
-                MessageBox.Show($"Altyazı dosyası seçilirken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Update progress bar
+                progressDownload.Value = p * 100;
+            });
+            
+            // Configure speech recognition options
+            var options = new SpeechRecognitionOptions
+            {
+                ApiKey = Environment.GetEnvironmentVariable("AZURE_SPEECH_KEY") ?? "",
+                Region = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION") ?? "westus",
+                LanguageCode = "en-US",
+                UseContinuousRecognition = true,
+                EnableWordLevelTimestamps = true
+            };
+            
+            // Start the transcription
+            _currentTranscription = await _speechRecognitionService.TranscribeAudioFileAsync(
+                audioFilePath,
+                options,
+                progressCallback: progress);
+            
+            // Transcription complete
+            progressDownload.Value = 100;
+            
+            // Display the transcription result
+            DisplayTranscriptionResult(_currentTranscription);
+            
+            // Show success message
+            MessageBox.Show("Audio transcription completed successfully!",
+                "Transcription Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error transcribing audio: {ex.Message}",
+                "Transcription Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            // Hide progress UI
+            downloadProgressGrid.Visibility = Visibility.Collapsed;
+            SetLoadingState(false);
+        }
+    }
+    
+    /// <summary>
+    /// Display the transcription result in the UI
+    /// </summary>
+    private void DisplayTranscriptionResult(TranscriptionResult transcription)
+    {
+        if (transcription == null || transcription.Segments.Count == 0)
+        {
+            MessageBox.Show("No transcription result available", "Empty Transcription", 
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        
+        // Show the transcription panel
+        transcriptionPanel.Visibility = Visibility.Visible;
+        
+        // Display the full text in the text box
+        txtTranscriptionResult.Text = transcription.FullText;
+    }
+    
+    /// <summary>
+    /// Handle the save transcription button click
+    /// </summary>
+    private async void BtnSaveTranscription_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentTranscription == null)
+        {
+            MessageBox.Show("No transcription available to save", "Save Error", 
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        
+        try
+        {
+            // Ask user for the save format
+            var formatWindow = new SaveFormatDialog();
+            if (formatWindow.ShowDialog() != true)
+            {
+                return;
+            }
+            
+            string format = formatWindow.SelectedFormat;
+            string defaultExt = format.ToLower();
+            string filter = $"{format.ToUpper()} Files (*.{defaultExt})|*.{defaultExt}|All Files (*.*)|*.*";
+            
+            // Ask user for the save location
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                FileName = $"Transcription_{DateTime.Now:yyyyMMdd_HHmmss}.{defaultExt}",
+                DefaultExt = defaultExt,
+                Filter = filter,
+                InitialDirectory = _downloadsFolderPath
+            };
+            
+            bool? result = saveFileDialog.ShowDialog(this);
+            
+            if (result.HasValue && result.Value)
+            {
+                // Show loading state
+                SetLoadingState(true);
+                
+                // Save the transcription
+                string savedPath = await _speechRecognitionService.SaveTranscriptionAsync(
+                    _currentTranscription,
+                    saveFileDialog.FileName,
+                    format.ToLower());
+                
+                MessageBox.Show($"Transcription saved successfully to:\n{savedPath}", 
+                    "Save Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                
+                // Open the folder containing the saved file
+                System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{savedPath}\"");
             }
         }
-        #endregion
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error saving transcription: {ex.Message}", 
+                "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            SetLoadingState(false);
+        }
+    }
+      /// <summary>
+    /// Handle the translate text button click
+    /// </summary>
+    private async void BtnTranslateText_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_currentTranscription == null || _currentTranscription.Segments.Count == 0)
+            {
+                MessageBox.Show("No transcription available to translate", "Translation Error", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            // Check if we have Azure Translator credentials
+            var apiKey = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_KEY");
+            var region = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_REGION");
+            
+            if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(region))
+            {
+                // Prompt for API key and region if not set
+                var result = MessageBox.Show(
+                    "Azure Translator Service credentials are required for translation.\n\n" +
+                    "Would you like to enter your credentials now?",
+                    "Credentials Required",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Show a dialog to get credentials
+                    if (!await ShowTranslatorCredentialsDialog())
+                    {
+                        return;
+                    }
+                    
+                    // Update the credentials in the service
+                    apiKey = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_KEY");
+                    region = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_REGION");
+                    
+                    if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(region))
+                    {
+                        MessageBox.Show(
+                            "Valid credentials are required to continue.",
+                            "Translation Canceled",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+            
+            // Now translate the transcription
+            await TranslateTranscription(_currentTranscription);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error translating text: {ex.Message}",
+                "Translation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+    
+    /// <summary>
+    /// Translates the transcription and displays the result
+    /// </summary>
+    private async Task TranslateTranscription(TranscriptionResult transcription)
+    {
+        try
+        {
+            // Show progress UI
+            downloadProgressGrid.Visibility = Visibility.Visible;
+            txtDownloadStatus.Text = "Translating text...";
+            SetLoadingState(true);
+            
+            // Create a progress reporter
+            var progress = new Progress<double>(p =>
+            {
+                // Update progress bar
+                progressDownload.Value = p * 100;
+            });
+              // Configure translation options
+            var options = new TranslationOptions
+            {
+                ApiKey = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_KEY") ?? "",
+                Region = Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_REGION") ?? "global",
+                SourceLanguage = "en",
+                TargetLanguage = "tr",
+                PreserveFormatting = true
+            };
+            
+            // Configure additional Turkish-specific options
+            options.ConfigureForTurkish();
+            
+            // Start the enhanced translation for English to Turkish
+            _currentTranslation = await _translationService.TranslateTranscriptionEnglishToTurkish(
+                transcription,
+                options,
+                progressCallback: progress,
+                cancellationToken: CancellationToken.None);
+            
+            // Translation complete
+            progressDownload.Value = 100;
+            
+            // Display the translation result
+            DisplayTranslationResult(_currentTranslation);
+            
+            // Show success message
+            MessageBox.Show("Text translation completed successfully!",
+                "Translation Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            
+            // Ask if the user wants to save the translation
+            var saveResult = MessageBox.Show(
+                "Would you like to save the translated text?",
+                "Save Translation",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+                
+            if (saveResult == MessageBoxResult.Yes)
+            {
+                await SaveTranslation();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error translating text: {ex.Message}",
+                "Translation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            // Hide progress UI
+            downloadProgressGrid.Visibility = Visibility.Collapsed;
+            SetLoadingState(false);
+        }
+    }
+      /// <summary>
+    /// Display the translation result in the UI
+    /// </summary>
+    private void DisplayTranslationResult(TranslationResult translation)
+    {
+        if (translation == null || string.IsNullOrEmpty(translation.TranslatedText))
+        {
+            MessageBox.Show("No translation result available", "Empty Translation", 
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        
+        // Display the translated text in the translation tab
+        txtTranslationResult.Text = translation.TranslatedText;
+        
+        // Update the bilingual view
+        txtBilingualSource.Text = translation.SourceText;
+        txtBilingualTarget.Text = translation.TranslatedText;
+        
+        // Switch to the translation tab
+        tabTranslation.IsSelected = true;
+          // Show the save translation button
+        btnSaveTranslation.Visibility = Visibility.Visible;
+        
+        // Show the enhance Turkish button
+        btnEnhanceTranslation.Visibility = Visibility.Visible;
+        
+        // Show the generate speech button
+        btnGenerateSpeech.Visibility = Visibility.Visible;
+    }
+    
+    /// <summary>
+    /// Save the current translation to a file
+    /// </summary>
+    private async Task SaveTranslation()
+    {
+        if (_currentTranslation == null)
+        {
+            MessageBox.Show("No translation available to save", "Save Error", 
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        
+        try
+        {
+            // Ask user for the save format
+            var formatWindow = new SaveFormatDialog();
+            if (formatWindow.ShowDialog() != true)
+            {
+                return;
+            }
+            
+            string format = formatWindow.SelectedFormat;
+            string defaultExt = format.ToLower();
+            string filter = $"{format.ToUpper()} Files (*.{defaultExt})|*.{defaultExt}|All Files (*.*)|*.*";
+            
+            // Ask user for the save location
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                FileName = $"Translation_TR_{DateTime.Now:yyyyMMdd_HHmmss}.{defaultExt}",
+                DefaultExt = defaultExt,
+                Filter = filter,
+                InitialDirectory = _downloadsFolderPath
+            };
+            
+            bool? result = saveFileDialog.ShowDialog(this);
+            
+            if (result.HasValue && result.Value)
+            {
+                // Show loading state
+                SetLoadingState(true);
+                
+                // Save the translation
+                string savedPath = await _translationService.SaveTranslationAsync(
+                    _currentTranslation,
+                    saveFileDialog.FileName,
+                    format.ToLower());
+                
+                MessageBox.Show($"Translation saved successfully to:\n{savedPath}", 
+                    "Save Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                
+                // Open the folder containing the saved file
+                System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{savedPath}\"");
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error saving translation: {ex.Message}", 
+                "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            SetLoadingState(false);
+        }
+    }
+    
+    /// <summary>
+    /// Handle the save translation button click
+    /// </summary>
+    private async void BtnSaveTranslation_Click(object sender, RoutedEventArgs e)
+    {
+        await SaveTranslation();
+    }
+    
+    /// <summary>
+    /// Shows a dialog to collect Azure Translator Service credentials
+    /// </summary>
+    private Task<bool> ShowTranslatorCredentialsDialog()
+    {
+        // For simplicity, we'll use a message box to get the credentials
+        // In a real app, you would create a proper dialog with input fields
+        
+        // Get API Key
+        string apiKey = Interaction.InputBox(
+            "Enter your Azure Translator API Key:",
+            "Azure Translator Service Credentials",
+            Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_KEY") ?? "");
+            
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            return Task.FromResult(false);
+        }
+        
+        // Get Region
+        string region = Interaction.InputBox(
+            "Enter your Azure Translator Region (e.g., global, westus):",
+            "Azure Translator Service Credentials",
+            Environment.GetEnvironmentVariable("AZURE_TRANSLATOR_REGION") ?? "global");
+            
+        if (string.IsNullOrWhiteSpace(region))
+        {
+            return Task.FromResult(false);
+        }
+        
+        // Store the credentials as environment variables
+        Environment.SetEnvironmentVariable("AZURE_TRANSLATOR_KEY", apiKey);
+        Environment.SetEnvironmentVariable("AZURE_TRANSLATOR_REGION", region);
+        
+        return Task.FromResult(true);
+    }
+      /// <summary>
+    /// Shows a dialog to collect Azure Speech Service credentials
+    /// </summary>
+    private Task<bool> ShowCredentialsDialog()
+    {
+        // For simplicity, we'll use a message box to get the credentials
+        // In a real app, you would create a proper dialog with input fields
+        
+        // Get API Key
+        string apiKey = Microsoft.VisualBasic.Interaction.InputBox(
+            "Enter your Azure Speech Service API Key:",
+            "Azure Speech Service Credentials",
+            Environment.GetEnvironmentVariable("AZURE_SPEECH_KEY") ?? "");
+            
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            return Task.FromResult(false);
+        }
+        
+        // Get Region
+        string region = Microsoft.VisualBasic.Interaction.InputBox(
+            "Enter your Azure Speech Service Region (e.g., westus, eastus):",
+            "Azure Speech Service Credentials",
+            Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION") ?? "westus");
+            
+        if (string.IsNullOrWhiteSpace(region))
+        {
+            return Task.FromResult(false);
+        }
+        
+        // Store the credentials as environment variables
+        Environment.SetEnvironmentVariable("AZURE_SPEECH_KEY", apiKey);
+        Environment.SetEnvironmentVariable("AZURE_SPEECH_REGION", region);
+        
+        return Task.FromResult(true);
+    }
+    
+    /// <summary>
+    /// Handle the exit menu item click
+    /// </summary>
+    private void BtnExit_Click(object sender, RoutedEventArgs e)
+    {
+        Application.Current.Shutdown();
     }
 
-    // Helper enum for UI panel management
-    public enum ProgressPanel
+    /// <summary>
+    /// Handle the configure speech credentials menu item click
+    /// </summary>
+    private async void BtnConfigureSpeechCredentials_Click(object sender, RoutedEventArgs e)
     {
-        Download,
-        Transcription,
-        Translation,
-        Speech,
-        Dubbing
+        await ShowCredentialsDialog();
+    }
+
+    /// <summary>
+    /// Handle the configure translation credentials menu item click
+    /// </summary>
+    private async void BtnConfigureTranslationCredentials_Click(object sender, RoutedEventArgs e)
+    {
+        await ShowTranslatorCredentialsDialog();
+    }
+
+    /// <summary>
+    /// Handle the reset credentials menu item click
+    /// </summary>
+    private void BtnResetCredentials_Click(object sender, RoutedEventArgs e)
+    {
+        // Clear all credentials from environment variables
+        Environment.SetEnvironmentVariable("AZURE_SPEECH_KEY", null);
+        Environment.SetEnvironmentVariable("AZURE_SPEECH_REGION", null);
+        Environment.SetEnvironmentVariable("AZURE_TRANSLATOR_KEY", null);
+        Environment.SetEnvironmentVariable("AZURE_TRANSLATOR_REGION", null);
+        
+        MessageBox.Show(
+            "All Azure credentials have been reset. You will be prompted for credentials when needed.",
+            "Credentials Reset",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
+
+    /// <summary>
+    /// Handle the about menu item click
+    /// </summary>
+    private void BtnAbout_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBox.Show(
+            "YouTube Video Dubber\n\n" +
+            "A tool for downloading YouTube videos, extracting audio, transcribing, translating to Turkish, " +
+            "generating synthesized speech, and creating dubbed videos.\n\n" +
+            "Version: 1.0\n" +
+            "© 2025 - All rights reserved",
+            "About YouTube Video Dubber",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
+      /// <summary>
+    /// Handle the generate speech button click
+    /// </summary>
+    private async void BtnGenerateSpeech_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_currentTranslation == null || string.IsNullOrEmpty(_currentTranslation.TranslatedText))
+            {
+                MessageBox.Show("No translation available to synthesize speech", "Speech Synthesis Error", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            // Check if we have Azure Speech credentials
+            var apiKey = Environment.GetEnvironmentVariable("AZURE_SPEECH_KEY");
+            var region = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION");
+            
+            if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(region))
+            {
+                // Prompt for API key and region if not set
+                var result = MessageBox.Show(
+                    "Azure Speech Service credentials are required for text-to-speech synthesis.\n\n" +
+                    "Would you like to enter your credentials now?",
+                    "Credentials Required",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Show a dialog to get credentials
+                    if (!await ShowCredentialsDialog())
+                    {
+                        return;
+                    }
+                    
+                    // Update the credentials in the service
+                    apiKey = Environment.GetEnvironmentVariable("AZURE_SPEECH_KEY");
+                    region = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION");
+                    
+                    if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(region))
+                    {
+                        MessageBox.Show(
+                            "Valid credentials are required to continue.",
+                            "Speech Synthesis Canceled",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                        return;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+              
+            // Create base options with credentials
+            var options = new TextToSpeechOptions
+            {
+                ApiKey = apiKey,
+                Region = region,
+                LanguageCode = "tr-TR"
+            };
+            
+            // Show the new Turkish speech options dialog
+            var optionsDialog = new TurkishSpeechOptionsDialog(
+                _textToSpeechService, 
+                _currentTranslation.TranslatedText, 
+                options);
+            
+            optionsDialog.Owner = this;
+            
+            if (optionsDialog.ShowDialog() != true)
+            {
+                return; // User canceled
+            }
+            
+            // Get the speech options from the dialog
+            options = optionsDialog.SpeechOptions;
+            
+            // Show progress UI
+            downloadProgressGrid.Visibility = Visibility.Visible;
+            txtDownloadStatus.Text = "Generating Turkish speech...";
+            SetLoadingState(true);
+            
+            // Create a progress reporter
+            var progress = new Progress<double>(p =>
+            {
+                // Update progress bar
+                progressDownload.Value = p * 100;
+            });
+            
+            // Output file path
+            string fileName = _currentVideoInfo?.Title ?? "speech";
+            string outputPath = Path.Combine(
+                _downloadsFolderPath,
+                "Synthesized",
+                $"{fileName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.{options.OutputFormat}");
+            
+            // Create directory if it doesn't exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            
+            // Generate speech using the specialized Turkish method
+            _lastSynthesizedAudioPath = await _textToSpeechService.SynthesizeTurkishSpeechAsync(
+                _currentTranslation.TranslatedText, 
+                outputPath,
+                options,
+                progress,
+                CancellationToken.None);
+            
+            // Enable the dubbing button
+            btnCreateDubbedVideo.Visibility = Visibility.Visible;
+            
+            // Show success message
+            MessageBox.Show(
+                $"Turkish speech generated successfully with enhanced natural intonation!\n\nSaved to:\n{_lastSynthesizedAudioPath}",
+                "Turkish Speech Generation Complete",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error generating Turkish speech: {ex.Message}",
+                "Speech Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            // Hide progress UI
+            downloadProgressGrid.Visibility = Visibility.Collapsed;
+            SetLoadingState(false);
+        }
+    }
+      /// <summary>
+    /// Handle the create dubbed video button click
+    /// </summary>
+    private async void BtnCreateDubbedVideo_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {            if (_currentVideoInfo == null || string.IsNullOrEmpty(_currentVideoInfo.LocalFilePath))
+            {
+                MessageBox.Show("No video available for dubbing", "Dubbing Error", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            if (string.IsNullOrEmpty(_lastSynthesizedAudioPath) || !File.Exists(_lastSynthesizedAudioPath))
+            {
+                MessageBox.Show("No synthesized audio available for dubbing", "Dubbing Error", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            // Show the Turkish dubbing options dialog
+            var optionsDialog = new TurkishDubbingOptionsDialog();
+            optionsDialog.Owner = this;
+            
+            if (optionsDialog.ShowDialog() != true)
+            {
+                // User canceled
+                return;
+            }
+            
+            // Get the user's dubbing options
+            var dubbingOptions = optionsDialog.DubbingOptions;
+            
+            // Show progress UI
+            downloadProgressGrid.Visibility = Visibility.Visible;
+            txtDownloadStatus.Text = "Creating Turkish dubbed video...";
+            SetLoadingState(true);
+            
+            // Create a progress reporter
+            var progress = new Progress<double>(p =>
+            {
+                // Update progress bar
+                progressDownload.Value = p * 100;
+            });
+            
+            // Output file path
+            string fileName = _currentVideoInfo.Title ?? "dubbed_video";
+            string outputPath = Path.Combine(
+                _downloadsFolderPath,
+                "Dubbed",
+                $"{fileName.Replace(" ", "_")}_turkish_dubbed_{DateTime.Now:yyyyMMdd_HHmmss}.{dubbingOptions.OutputFormat}");
+            
+            // Create directory if it doesn't exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            
+            // Create the dubbed video with enhanced options
+            _lastDubbedVideoPath = await _audioVideoMergeService.CreateTurkishDubbedVideoAsync(
+                _currentVideoInfo.LocalFilePath,
+                _lastSynthesizedAudioPath,
+                outputPath,
+                dubbingOptions,
+                progress,
+                CancellationToken.None);
+            
+            // Show success message with option to play the video
+            var playResult = MessageBox.Show(
+                $"Turkish dubbed video created successfully with enhanced audio mixing!\n\nSaved to:\n{_lastDubbedVideoPath}\n\nWould you like to play it now?",
+                "Turkish Dubbing Complete",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Information);
+                
+            if (playResult == MessageBoxResult.Yes)
+            {
+                // Open the video using the default player
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = _lastDubbedVideoPath,
+                    UseShellExecute = true
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error creating Turkish dubbed video: {ex.Message}",
+                "Turkish Dubbing Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            // Hide progress UI
+            downloadProgressGrid.Visibility = Visibility.Collapsed;
+            SetLoadingState(false);
+        }
+    }
+      /// <summary>
+    /// Shows a dialog to collect speech synthesis options
+    /// </summary>
+    private async Task<TextToSpeechOptions?> ShowSpeechSynthesisOptionsDialog()
+    {
+        try
+        {
+            // Create a new options object with default values
+            var options = new TextToSpeechOptions
+            {
+                ApiKey = Environment.GetEnvironmentVariable("AZURE_SPEECH_KEY") ?? "",
+                Region = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION") ?? "westus",
+                LanguageCode = "tr-TR",
+                OutputFormat = "wav"
+            };
+              
+            // Try to get available voices
+            string[] availableVoices;
+            try
+            {
+                availableVoices = await _textToSpeechService.GetAvailableVoicesAsync(
+                    options.LanguageCode, options, CancellationToken.None);
+                
+                if (availableVoices.Length > 0)
+                {
+                    // Default to the recommended Turkish voice from TurkishVoiceHelper
+                    options.VoiceName = TurkishVoiceHelper.GetRecommendedMaleVoice();
+                }
+            }
+            catch
+            {
+                // If we can't get voices, use Turkish voices from the helper
+                availableVoices = TurkishVoiceHelper.TurkishVoices.Keys.ToArray();
+                options.VoiceName = TurkishVoiceHelper.GetRecommendedMaleVoice();
+            }
+            
+            // Use a series of input boxes for simplicity
+            // In a real app, you would create a proper dialog with dropdown menus and sliders
+            
+            // 1. First, ask if user wants automatic voice selection based on content
+            var useAutoVoice = MessageBox.Show(
+                "Would you like to automatically select the most appropriate Turkish voice based on the content?",
+                "Automatic Voice Selection",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question) == MessageBoxResult.Yes;
+                
+            if (useAutoVoice)
+            {
+                // Analyze content and pick the most appropriate voice
+                options.VoiceName = TurkishVoiceHelper.GetAppropriateVoice(_currentTranslation.TranslatedText);
+                
+                // Inform user of selection
+                string voiceDescription = TurkishVoiceHelper.TurkishVoices.TryGetValue(options.VoiceName, out string desc) 
+                    ? desc 
+                    : options.VoiceName;
+                
+                MessageBox.Show(
+                    $"Based on your content, the following voice has been selected:\n\n{voiceDescription}",
+                    "Auto-Selected Voice",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            else
+            {
+                // 2. Manual voice selection
+                // Create a more descriptive voice list using TurkishVoiceHelper
+                var voiceOptions = new List<string>();
+                var voiceDescriptions = new Dictionary<int, string>();
+                
+                for (int i = 0; i < availableVoices.Length; i++)
+                {
+                    string voiceName = availableVoices[i];
+                    string description = TurkishVoiceHelper.TurkishVoices.TryGetValue(voiceName, out string desc) 
+                        ? desc 
+                        : voiceName;
+                    voiceOptions.Add($"{i + 1}. {description}");
+                    voiceDescriptions[i] = voiceName;
+                }
+                
+                string voiceList = string.Join(Environment.NewLine, voiceOptions);
+                string voiceSelection = Microsoft.VisualBasic.Interaction.InputBox(
+                    $"Available voices for Turkish (enter the number):\n\n{voiceList}",
+                    "Select Voice",
+                    "1");
+                
+                if (string.IsNullOrWhiteSpace(voiceSelection))
+                {
+                    return null; // User canceled
+                }
+                
+                if (int.TryParse(voiceSelection, out int selectedVoice) && selectedVoice >= 1 && selectedVoice <= availableVoices.Length)
+                {
+                    options.VoiceName = availableVoices[selectedVoice - 1];
+                }
+            }
+            
+            // 3. Voice style selection (only for neural voices)
+            if (options.VoiceName.EndsWith("Neural"))
+            {
+                // Create style list
+                var styleOptions = new List<string>();
+                int styleIndex = 0;
+                
+                foreach (var style in TurkishVoiceHelper.TurkishVoiceStyles)
+                {
+                    styleOptions.Add($"{++styleIndex}. {style.Value}");
+                }
+                
+                string styleList = string.Join(Environment.NewLine, styleOptions);
+                string styleSelection = Microsoft.VisualBasic.Interaction.InputBox(
+                    $"Available speaking styles (enter the number):\n\n{styleList}",
+                    "Select Speaking Style",
+                    "1"); // Default to general
+                
+                if (string.IsNullOrWhiteSpace(styleSelection))
+                {
+                    return null; // User canceled
+                }
+                
+                if (int.TryParse(styleSelection, out int selectedStyle) && selectedStyle >= 1 && selectedStyle <= TurkishVoiceHelper.TurkishVoiceStyles.Count)
+                {
+                    options.SpeakingStyle = TurkishVoiceHelper.TurkishVoiceStyles.Keys.ElementAt(selectedStyle - 1);
+                }
+            }
+            
+            // 4. Speaking rate
+            string rateSelection = Microsoft.VisualBasic.Interaction.InputBox(
+                "Speaking rate (0.5 to 2.0, where 1.0 is normal speed):",
+                "Speaking Rate",
+                "1.0");
+                
+            if (string.IsNullOrWhiteSpace(rateSelection))
+            {
+                return null; // User canceled
+            }
+            
+            if (float.TryParse(rateSelection, out float rate) && rate >= 0.5f && rate <= 2.0f)
+            {
+                options.SpeakingRate = rate;
+            }
+            
+            // 5. Pitch adjustment (for more expressive speech)
+            string pitchSelection = Microsoft.VisualBasic.Interaction.InputBox(
+                "Pitch adjustment (-20 to +20, where 0 is normal pitch):",
+                "Pitch Adjustment",
+                "0");
+                
+            if (string.IsNullOrWhiteSpace(pitchSelection))
+            {
+                return null; // User canceled
+            }
+            
+            if (int.TryParse(pitchSelection, out int pitch) && pitch >= -20 && pitch <= 20)
+            {
+                options.PitchAdjustment = pitch;
+            }
+            
+            // Set other Turkish-specific TTS options
+            options.UseSSML = true;
+            
+            return options;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error in speech synthesis options dialog: {ex.Message}",
+                "Dialog Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return null;
+        }
+    }
+    
+    /// <summary>
+    /// Enhances existing Turkish translation using the special Turkish helpers
+    /// </summary>
+    private void BtnEnhanceTranslation_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_currentTranslation == null || string.IsNullOrEmpty(_currentTranslation.TranslatedText))
+            {
+                MessageBox.Show("No translation available to enhance", "Enhancement Error", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            // Apply the Turkish-specific enhancements
+            string enhancedText = _currentTranslation.TranslatedText;
+            
+            // Apply all Turkish enhancements
+            enhancedText = EnglishTurkishHelper.ReplaceIdiomPlaceholders(enhancedText);
+            enhancedText = EnglishTurkishHelper.ApplyTurkishCapitalization(enhancedText);
+            enhancedText = EnglishTurkishHelper.FixTurkishILetters(enhancedText);
+            enhancedText = EnglishTurkishHelper.FixTurkishSuffixSpacing(enhancedText);
+            
+            // Update the translation
+            _currentTranslation.TranslatedText = enhancedText;
+            
+            // Update the UI
+            DisplayTranslationResult(_currentTranslation);
+            
+            // Show success message
+            MessageBox.Show("Turkish translation has been enhanced with specialized formatting and grammar corrections.",
+                "Enhancement Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error enhancing translation: {ex.Message}",
+                "Enhancement Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }
