@@ -12,7 +12,7 @@ namespace YouTubeDubber.Core.Helpers
         /// <summary>
         /// English idioms and their Turkish equivalents
         /// </summary>
-        private static readonly Dictionary<string, string> IdiomDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> IdiomDictionary = new(StringComparer.OrdinalIgnoreCase)
         {
             // Common English idioms that need special translation in Turkish
             { "break a leg", "başarılar dilerim" },
@@ -59,7 +59,7 @@ namespace YouTubeDubber.Core.Helpers
         /// <summary>
         /// Turkish pronouns that should be aligned with verb placement
         /// </summary>
-        private static readonly Dictionary<string, string> EnglishTurkishPronouns = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> EnglishTurkishPronouns = new(StringComparer.OrdinalIgnoreCase)
         {
             { "I ", "Ben " },
             { "you ", "Sen " },
@@ -80,7 +80,7 @@ namespace YouTubeDubber.Core.Helpers
         /// <summary>
         /// Words that should be capitalized in Turkish (mostly place and proper names)
         /// </summary>
-        private static readonly HashSet<string> TurkishCapitalizationExceptions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        private static readonly HashSet<string> TurkishCapitalizationExceptions = new(StringComparer.OrdinalIgnoreCase)
         {
             "türkiye", "türk", "istanbul", "ankara", "izmir", "antalya", "amerika", "avrupa", 
             "asya", "afrika", "ingiltere", "almanya", "fransa", "japonya", "çin", "rusya", 
@@ -91,7 +91,7 @@ namespace YouTubeDubber.Core.Helpers
         /// <summary>
         /// List of common Turkish suffixes that need to be properly attached (without space)
         /// </summary>
-        private static readonly List<string> TurkishSuffixes = new List<string>
+        private static readonly List<string> TurkishSuffixes = new()
         {
             "de", "da", "te", "ta", "den", "dan", "ten", "tan", "ye", "ya", "e", "a", "i", "ı", "u", "ü", "ler", "lar", "ki"
         };
@@ -108,7 +108,7 @@ namespace YouTubeDubber.Core.Helpers
             foreach (var idiom in IdiomDictionary)
             {
                 // Use regex to match whole idiom expressions (not partial matches)
-                string pattern = $@"\b{Regex.Escape(idiom.Key)}\b";
+                string pattern = $@"\\b{Regex.Escape(idiom.Key)}\\b";
                 
                 // Mark the idiom with special tags to preserve it through translation
                 text = Regex.Replace(text, pattern, $"[[IDIOM:{idiom.Key}]]", RegexOptions.IgnoreCase);
@@ -126,12 +126,12 @@ namespace YouTubeDubber.Core.Helpers
                 return text;
 
             // Find all idiom placeholders and replace them with Turkish equivalents
-            string pattern = @"\[\[IDIOM:(.*?)\]\]";
+            string pattern = @"\\[\\[IDIOM:(.*?)\\]\\]";
             return Regex.Replace(text, pattern, match => 
             {
                 string idiom = match.Groups[1].Value;
-                return IdiomDictionary.TryGetValue(idiom, out string translation) 
-                    ? translation 
+                return IdiomDictionary.TryGetValue(idiom, out var translation)
+                    ? translation
                     : idiom; // fallback to original if not found
             });
         }
@@ -145,7 +145,7 @@ namespace YouTubeDubber.Core.Helpers
                 return text;
 
             // Split into sentences
-            string[] sentences = Regex.Split(text, @"(?<=[.!?])\s+");
+            string[] sentences = Regex.Split(text, @"(?<=[.!?])\\s+");
             
             for (int i = 0; i < sentences.Length; i++)
             {
@@ -155,15 +155,15 @@ namespace YouTubeDubber.Core.Helpers
                 // Capitalize first character of each sentence
                 if (sentences[i].Length > 0)
                 {
-                    sentences[i] = char.ToUpper(sentences[i][0]) + sentences[i].Substring(1);
+                    sentences[i] = char.ToUpper(sentences[i][0]) + sentences[i][1..];
                 }
 
                 // Check for proper nouns and place names that should be capitalized
                 foreach (var word in TurkishCapitalizationExceptions)
                 {
-                    string pattern = $@"\b{Regex.Escape(word)}\b";
+                    string pattern = $@"\\b{Regex.Escape(word)}\\b";
                     sentences[i] = Regex.Replace(sentences[i], pattern, m => 
-                        char.ToUpper(m.Value[0]) + m.Value.Substring(1), 
+                        char.ToUpper(m.Value[0]) + m.Value[1..], 
                         RegexOptions.IgnoreCase);
                 }
             }
@@ -204,13 +204,9 @@ namespace YouTubeDubber.Core.Helpers
                     // In normal words, lowercase "i" gets a dot in Turkish, but uppercase is "İ"
                     // Only convert the first letter if it's at the beginning of a word
                     if (word[0] == 'i')
-                    {
-                        words[i] = 'İ' + word.Substring(1);
-                    }
+                        words[i] = 'İ' + word[1..];
                     else if (word[0] == 'I')
-                    {
-                        words[i] = 'ı' + word.Substring(1);
-                    }
+                        words[i] = 'ı' + word[1..];
                 }
             }
 
@@ -230,7 +226,7 @@ namespace YouTubeDubber.Core.Helpers
             // For suffixes that must attach to the word without a space
             foreach (var suffix in TurkishSuffixes)
             {
-                result = Regex.Replace(result, $@"\s+({suffix})\b", "$1");
+                result = Regex.Replace(result, $@"\\s+({suffix})\\b", "$1");
             }
 
             return result;
