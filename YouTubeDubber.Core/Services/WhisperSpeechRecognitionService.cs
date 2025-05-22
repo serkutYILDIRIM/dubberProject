@@ -88,10 +88,8 @@ namespace YouTubeDubber.Core.Services
             try
             {
                 var ggmlType = GetGgmlModelType(modelSize);
-                
-                // Download the model using Whisper.net's built-in downloader
-                using var modelStream = await WhisperGgmlDownloader.GetGgmlModelAsync(ggmlType, quantization: GgmlQuantizationType.Q5_0);
-                
+                  // Download the model using Whisper.net's built-in downloader
+                using var modelStream = await WhisperGgmlDownloader.GetGgmlModelAsync(ggmlType, quantization: GgmlQuantization.Q5_0);
                 // Save the model to disk
                 using var fileStream = new FileStream(modelPath, FileMode.Create, FileAccess.Write);
                 
