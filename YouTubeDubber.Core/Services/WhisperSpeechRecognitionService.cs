@@ -266,31 +266,36 @@ namespace YouTubeDubber.Core.Services
         
         /// <summary>
         /// Initializes the Whisper processor if not already initialized
-        /// </summary>        private async Task InitializeWhisperProcessorAsync(
+        /// </summary>
+        private async Task InitializeWhisperProcessorAsync(
             IProgress<double>? progressCallback = null,
             CancellationToken cancellationToken = default)
         {
             if (_whisperProcessor != null)
                 return;
-                
-            string modelPath;
-                
+            
+            // First check under a lock to avoid multiple downloads
+            bool needDownload = false;
             lock (_lockObject)
             {
-                if (_whisperProcessor != null)
-                    return;
+                if (_whisperProcessor == null)
+                    needDownload = true;
             }
-                
-            // Download model if needed - using await properly
-            modelPath = await EnsureModelDownloadedAsync(WhisperModelSize.Base, progressCallback, cancellationToken);
-              
+            
+            // If we need to download the model, do it outside the lock
+            string modelPath = "";
+            if (needDownload)
+            {
+                modelPath = await EnsureModelDownloadedAsync(WhisperModelSize.Base, progressCallback, cancellationToken);
+            }
+            
+            // Re-check and initialize under lock
             lock (_lockObject)
             {
-                // Check again in case another thread initialized while we were downloading
                 if (_whisperProcessor != null)
                     return;
-                    
-                // Create Whisper processor
+                
+                // Create Whisper processor with the downloaded model
                 _whisperProcessor = WhisperFactory.FromPath(modelPath).CreateBuilder()
                     .WithLanguage("auto") // Auto-detect language
                     .Build();

@@ -65,16 +65,19 @@ namespace YouTubeDubber.Core.Tests
                 Console.WriteLine($"Error testing Whisper service: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
             }
-        }
-          /// <summary>
+        }        /// <summary>
         /// Tests the Silero text-to-speech service
         /// </summary>
         public static async Task TestSileroServiceAsync()
-        {            Console.WriteLine("Testing SileroTextToSpeechService...");
+        {            
+            Console.WriteLine("Testing SileroTextToSpeechService...");
             
             // Temporarily commenting out due to missing implementation
             //var service = new SileroTextToSpeechService();
             Console.WriteLine("SileroTextToSpeechService test is temporarily disabled");
+            
+            // Add a small delay to simulate async work
+            await Task.Delay(100);
             
             try
             {
