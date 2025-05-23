@@ -334,15 +334,17 @@ namespace YouTubeDubber.Core.Helpers
         private static string GetInstalledTorchSharpVersion()
         {
             try
-            {
-                // Try to load TorchSharp assembly to check version
+            {                // Try to load TorchSharp assembly to check version
                 var assembly = AppDomain.CurrentDomain.GetAssemblies()
                     .FirstOrDefault(a => a.GetName().Name == "TorchSharp");
                     
                 if (assembly != null)
                 {
-                    Version version = assembly.GetName().Version;
-                    return $"{version.Major}.{version.Minor}.{version.Build}";
+                    Version? version = assembly.GetName().Version;
+                    if (version != null) 
+                    {
+                        return $"{version.Major}.{version.Minor}.{version.Build}";
+                    }
                 }
                 
                 // Fallback to the version we added to the project

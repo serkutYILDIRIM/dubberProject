@@ -266,22 +266,31 @@ namespace YouTubeDubber.Core.Services
         
         /// <summary>
         /// Initializes the Whisper processor if not already initialized
-        /// </summary>
-        private async Task InitializeWhisperProcessorAsync(
+        /// </summary>        private async Task InitializeWhisperProcessorAsync(
             IProgress<double>? progressCallback = null,
             CancellationToken cancellationToken = default)
         {
             if (_whisperProcessor != null)
                 return;
                 
+            string modelPath;
+                
             lock (_lockObject)
             {
                 if (_whisperProcessor != null)
                     return;
+            }
+                
+            // Download model if needed - using await properly
+            modelPath = await EnsureModelDownloadedAsync(WhisperModelSize.Base, progressCallback, cancellationToken);
+              
+            lock (_lockObject)
+            {
+                // Check again in case another thread initialized while we were downloading
+                if (_whisperProcessor != null)
+                    return;
                     
-                // Download model if needed
-                var modelPath = EnsureModelDownloadedAsync(WhisperModelSize.Base, progressCallback, cancellationToken).Result;
-                  // Create Whisper processor
+                // Create Whisper processor
                 _whisperProcessor = WhisperFactory.FromPath(modelPath).CreateBuilder()
                     .WithLanguage("auto") // Auto-detect language
                     .Build();
