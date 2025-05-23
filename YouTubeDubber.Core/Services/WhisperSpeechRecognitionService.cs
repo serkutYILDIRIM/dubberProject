@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -84,12 +85,13 @@ namespace YouTubeDubber.Core.Services
             }
             
             progressCallback?.Report(0.0);
-            
-            try
-            {                var ggmlType = GetGgmlModelType(modelSize);
+              try
+            {
+                var ggmlType = GetGgmlModelType(modelSize);                // Download the model using Whisper.net's built-in downloader
+                using var httpClient = new HttpClient();
+                var downloader = new WhisperGgmlDownloader(httpClient);
+                using var modelStream = await downloader.GetGgmlModelAsync(ggmlType);
                 
-                // Download the model using Whisper.net's built-in downloader
-                using var modelStream = await WhisperGgmlDownloader.GetGgmlModelAsync(ggmlType);
                 // Save the model to disk
                 using var fileStream = new FileStream(modelPath, FileMode.Create, FileAccess.Write);
                 
