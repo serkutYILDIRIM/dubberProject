@@ -86,10 +86,10 @@ namespace YouTubeDubber.Core.Services
             progressCallback?.Report(0.0);
             
             try
-            {
-                var ggmlType = GetGgmlModelType(modelSize);
-                  // Download the model using Whisper.net's built-in downloader
-                using var modelStream = await WhisperGgmlDownloader.GetGgmlModelAsync(ggmlType, quantization: GgmlQuantization.Q5_0);
+            {                var ggmlType = GetGgmlModelType(modelSize);
+                
+                // Download the model using Whisper.net's built-in downloader
+                using var modelStream = await WhisperGgmlDownloader.GetGgmlModelAsync(ggmlType);
                 // Save the model to disk
                 using var fileStream = new FileStream(modelPath, FileMode.Create, FileAccess.Write);
                 
@@ -157,9 +157,9 @@ namespace YouTubeDubber.Core.Services
                 var whisperLanguage = GetWhisperLanguage(options.LanguageCode);
                 
                 var segments = new List<TranscriptionSegment>();
-                
-                // Process the audio file
-                await foreach (var segment in _whisperProcessor.ProcessAsync(audioFilePath, cancellationToken))
+                  // Process the audio file
+                using var audioStream = File.OpenRead(audioFilePath);
+                await foreach (var segment in _whisperProcessor.ProcessAsync(audioStream, cancellationToken))
                 {
                     var transcriptionSegment = new TranscriptionSegment
                     {
@@ -279,13 +279,9 @@ namespace YouTubeDubber.Core.Services
                     
                 // Download model if needed
                 var modelPath = EnsureModelDownloadedAsync(WhisperModelSize.Base, progressCallback, cancellationToken).Result;
-                
-                // Create Whisper processor
+                  // Create Whisper processor
                 _whisperProcessor = WhisperFactory.FromPath(modelPath).CreateBuilder()
                     .WithLanguage("auto") // Auto-detect language
-                    .WithTranslate(false) // Don't translate, just transcribe
-                    .WithProbabilities(false) // We don't need token probabilities
-                    .WithTokenTimestamps(true) // Enable word-level timestamps
                     .Build();
             }
         }
