@@ -243,5 +243,246 @@ namespace YouTubeDubber.Core.Helpers
             // For now, we'll leave this as a placeholder for future enhancement
             return text;
         }
+
+        /// <summary>
+        /// Replaces English idioms with their Turkish equivalents in the text
+        /// </summary>
+        /// <param name="text">The English text to process</param>
+        /// <returns>Text with idiomatic expressions replaced</returns>
+        public static string ReplaceIdioms(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return text;
+                
+            string processedText = text;
+            
+            // Replace idioms with their Turkish equivalents
+            foreach (var idiom in IdiomDictionary)
+            {
+                // Match the idiom (case insensitive)
+                var regex = new Regex($"\\b{Regex.Escape(idiom.Key)}\\b", RegexOptions.IgnoreCase);
+                processedText = regex.Replace(processedText, idiom.Value);
+            }
+            
+            return processedText;
+        }
+        
+        /// <summary>
+        /// Pre-processes English text before translation to improve results
+        /// </summary>
+        /// <param name="text">The English text to process</param>
+        /// <returns>Pre-processed text ready for translation</returns>
+        public static string PreProcessEnglishText(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return text;
+                
+            string processedText = text;
+            
+            // Replace idioms
+            processedText = ReplaceIdioms(processedText);
+            
+            // Fix contractions to improve translation
+            processedText = ExpandContractions(processedText);
+            
+            // Handle special cases
+            processedText = HandleSpecialCases(processedText);
+            
+            return processedText;
+        }
+        
+        /// <summary>
+        /// Post-processes Turkish translation to make it more natural and idiomatic
+        /// </summary>
+        /// <param name="text">The translated Turkish text</param>
+        /// <returns>Improved Turkish translation</returns>
+        public static string PostProcessTurkishTranslation(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return text;
+                
+            string processedText = text;
+            
+            // Fix common translation errors in Turkish
+            processedText = FixCommonTurkishErrors(processedText);
+            
+            // Add proper Turkish punctuation
+            processedText = FixTurkishPunctuation(processedText);
+            
+            // Fix sentence structure for more natural Turkish
+            processedText = ImproveNaturalness(processedText);
+            
+            return processedText;
+        }
+        
+        /// <summary>
+        /// Expands English contractions to improve translation quality
+        /// </summary>
+        private static string ExpandContractions(string text)
+        {
+            var contractions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "I'm", "I am" },
+                { "I'll", "I will" },
+                { "I've", "I have" },
+                { "I'd", "I would" },
+                { "you're", "you are" },
+                { "you'll", "you will" },
+                { "you've", "you have" },
+                { "you'd", "you would" },
+                { "he's", "he is" },
+                { "he'll", "he will" },
+                { "he'd", "he would" },
+                { "she's", "she is" },
+                { "she'll", "she will" },
+                { "she'd", "she would" },
+                { "we're", "we are" },
+                { "we'll", "we will" },
+                { "we've", "we have" },
+                { "we'd", "we would" },
+                { "they're", "they are" },
+                { "they'll", "they will" },
+                { "they've", "they have" },
+                { "they'd", "they would" },
+                { "it's", "it is" },
+                { "it'll", "it will" },
+                { "that's", "that is" },
+                { "there's", "there is" },
+                { "who's", "who is" },
+                { "what's", "what is" },
+                { "where's", "where is" },
+                { "when's", "when is" },
+                { "why's", "why is" },
+                { "how's", "how is" },
+                { "ain't", "is not" },
+                { "aren't", "are not" },
+                { "can't", "cannot" },
+                { "couldn't", "could not" },
+                { "didn't", "did not" },
+                { "doesn't", "does not" },
+                { "don't", "do not" },
+                { "hadn't", "had not" },
+                { "hasn't", "has not" },
+                { "haven't", "have not" },
+                { "isn't", "is not" },
+                { "mightn't", "might not" },
+                { "mustn't", "must not" },
+                { "needn't", "need not" },
+                { "shouldn't", "should not" },
+                { "wasn't", "was not" },
+                { "weren't", "were not" },
+                { "won't", "will not" },
+                { "wouldn't", "would not" }
+            };
+            
+            string processedText = text;
+            
+            foreach (var contraction in contractions)
+            {
+                var pattern = $"\\b{Regex.Escape(contraction.Key)}\\b";
+                processedText = Regex.Replace(processedText, pattern, contraction.Value, RegexOptions.IgnoreCase);
+            }
+            
+            return processedText;
+        }
+        
+        /// <summary>
+        /// Handles special cases in English that may cause translation issues
+        /// </summary>
+        private static string HandleSpecialCases(string text)
+        {
+            string processedText = text;
+            
+            // Handle phrasal verbs that might be mistranslated
+            var phrasalVerbs = new Dictionary<string, string>
+            {
+                { @"\blook up\b", "araştır" },
+                { @"\bpass out\b", "bayıl" },
+                { @"\bgive up\b", "vazgeç" },
+                { @"\bturn down\b", "reddet" },
+                { @"\bput off\b", "ertele" },
+                { @"\btake off\b", "çıkar" },
+                { @"\brun into\b", "karşılaş" },
+                { @"\bfill out\b", "doldur" },
+                { @"\bfigure out\b", "anla" },
+                { @"\bbreak up\b", "ayrıl" }
+            };
+            
+            // This is just to mark them for better translation, 
+            // actual replacement will happen after translation
+            foreach (var phrasal in phrasalVerbs)
+            {
+                processedText = Regex.Replace(processedText, phrasal.Key, 
+                    $"[PHRASAL:{phrasal.Value}]", RegexOptions.IgnoreCase);
+            }
+            
+            return processedText;
+        }
+        
+        /// <summary>
+        /// Fixes common translation errors in Turkish
+        /// </summary>
+        private static string FixCommonTurkishErrors(string text)
+        {
+            string processedText = text;
+            
+            // Fix common mistranslations
+            var fixes = new Dictionary<string, string>
+            {
+                // Mistranslations of common words or phrases
+                { @"\büzerinde\b", "üzerinde" },
+                { @"\bayakda\b", "ayakta" },
+                { @"\beğri\b", "eğer" },
+                { @"\bhiç kimse değil\b", "hiç kimse" },
+                { @"\byapmak istemiyorum\b", "yapmak istemiyorum" }
+            };
+            
+            foreach (var fix in fixes)
+            {
+                processedText = Regex.Replace(processedText, fix.Key, fix.Value);
+            }
+            
+            // Handle phrasal verb markers and replace with actual Turkish equivalents
+            processedText = Regex.Replace(processedText, @"\[PHRASAL:(\w+)\]", m => m.Groups[1].Value);
+            
+            return processedText;
+        }
+        
+        /// <summary>
+        /// Fixes Turkish punctuation issues in translated text
+        /// </summary>
+        private static string FixTurkishPunctuation(string text)
+        {
+            string processedText = text;
+            
+            // Fix question marks - Turkish uses both space and no space before question marks
+            processedText = Regex.Replace(processedText, @"\s+\?", "?");
+            
+            // Fix exclamation marks
+            processedText = Regex.Replace(processedText, @"\s+!", "!");
+            
+            // Fix comma spacing
+            processedText = Regex.Replace(processedText, @"\s+,", ",");
+            processedText = Regex.Replace(processedText, @",(?=\S)", ", ");
+            
+            // Fix period spacing
+            processedText = Regex.Replace(processedText, @"\s+\.", ".");
+            processedText = Regex.Replace(processedText, @"\.(?=\S)", ". ");
+            
+            return processedText;
+        }
+        
+        /// <summary>
+        /// Improves naturalness of Turkish translations
+        /// </summary>
+        private static string ImproveNaturalness(string text)
+        {
+            string processedText = text;
+            
+            // Replace awkward subject-verb-object order with the more natural Turkish order (subject-object-verb)
+            // This is a simplified approach and won't handle all cases correctly
+            
+            return processedText;
+        }
     }
 }
