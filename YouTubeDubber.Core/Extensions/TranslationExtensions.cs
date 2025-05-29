@@ -36,13 +36,6 @@ namespace YouTubeDubber.Core.Extensions
                     text, options, progressCallback, cancellationToken);
             }
             
-            // Use the LibreTranslate-specific service if available
-            if (translationService is Services.LibreTranslateService libreService)
-            {
-                return await libreService.TranslateTextWithEnhancementsAsync(
-                    text, options, progressCallback, cancellationToken);
-            }
-            
             // Fallback to regular translation if the service doesn't support enhancements
             return await translationService.TranslateTextAsync(text, options, cancellationToken);
         }

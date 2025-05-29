@@ -22,12 +22,9 @@ namespace YouTubeDubber.Test
                         case "whisper":
                             await ServiceTests.TestWhisperServiceAsync();
                             break;
-                                  case "silero":
-                            await ServiceTests.TestSileroServiceAsync();
-                            break;
                             
-                    case "libretranslate":
-                            await ServiceTests.TestLibreTranslateServiceAsync();
+                        case "silero":
+                            await ServiceTests.TestSileroServiceAsync();
                             break;
                             
                         default:
@@ -54,11 +51,11 @@ namespace YouTubeDubber.Test
         static async Task ShowMenuAsync()
         {
             while (true)
-            {                Console.WriteLine("\nChoose a test to run:");
+            {
+                Console.WriteLine("\nChoose a test to run:");
                 Console.WriteLine("1. Test Whisper Speech Recognition");
                 Console.WriteLine("2. Test Silero Text-to-Speech");
-                Console.WriteLine("3. Test LibreTranslate Translation");
-                Console.WriteLine("4. Run All Tests");
+                Console.WriteLine("3. Run All Tests");
                 Console.WriteLine("0. Exit");
                 
                 Console.Write("\nYour choice: ");
@@ -74,11 +71,8 @@ namespace YouTubeDubber.Test
                     case '2':
                         await ServiceTests.TestSileroServiceAsync();
                         break;
-                          case '3':
-                        await ServiceTests.TestLibreTranslateServiceAsync();
-                        break;
                         
-                    case '4':
+                    case '3':
                         await ServiceTests.RunAllTestsAsync();
                         break;
                         
